@@ -21,4 +21,4 @@ for row in range(cut_into):
     
     bpy.ops.render.render(write_still = True)
 
-# blender -b file.blend -P border_render_sample.py
+# blender -b file.blend -P border_render_sample.py -noaudio
