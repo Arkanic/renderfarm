@@ -4,20 +4,18 @@ import fs from "fs";
 import {getMigration, getMigrations} from "./db/migrator";
 import constants from "./constants";
 
-const DATA_DIR = "data";
-
 /**
  * Set up database and return
  */
 export default async (type:string | undefined):Promise<knex.Knex<any, unknown[]>> => {
     return new Promise((resolve, reject) => {
-        if(!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR); // if the data folder doesn't exist, make it
+        if(!fs.existsSync(constants.DATA_DIR)) fs.mkdirSync(constants.DATA_DIR); // if the data folder doesn't exist, make it
 
         let db:knex.Knex<any, unknown[]> | PromiseLike<knex.Knex<any, unknown[]>>;
         db = knex.default({
             client: "better-sqlite3",
             connection: {
-                filename: `./${DATA_DIR}/renderfarm.db`
+                filename: `./${constants.DATA_DIR}/renderfarm.db`
             },
             useNullAsDefault: true
         });
@@ -29,11 +27,11 @@ export default async (type:string | undefined):Promise<knex.Knex<any, unknown[]>
 }
 
 function readVersion():string {
-    return fs.readFileSync(`./${DATA_DIR}/version`).toString();
+    return fs.readFileSync(`./${constants.DATA_DIR}/version`).toString();
 }
 
 function createVersion(version:string) {
-    fs.writeFileSync(`./${DATA_DIR}/version`, version);
+    fs.writeFileSync(`./${constants.DATA_DIR}/version`, version);
 }
 
 /**

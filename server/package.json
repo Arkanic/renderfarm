@@ -2,13 +2,13 @@
   "name": "renderfarm-server",
   "version": "1.0.0",
   "description": "Arkanic/renderfarm server",
-  "main": "index.js",
+  "main": "server.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "npm run clean && npm run sbuild && npm run cbuild",
     "clean": "rm -rf ./server-build ./dashboard-build",
     "sbuild": "tsc",
-    "cbuild": "webpack --config ./webpack.config.js && cp -r ./dashboard/static/* ./dashboard-build",
+    "cbuild": "webpack --config ./webpack.config.js --progress && cp -r ./dashboard/static/* ./dashboard-build",
     "start": "node ./server-build/server.js",
     "quick": "npm run build && npm run start"
   },
