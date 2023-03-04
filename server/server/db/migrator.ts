@@ -4,7 +4,7 @@ import path from "path";
 import fs from "fs";
 import {Version, parseVersion, compareVersions} from "./versions";
 
-const baseMigrationPath = path.join("../../../server-build/orchestrator/db/migrations");
+const baseMigrationPath = path.join("../../server-build/db/migrations");
 
 /**
  * Get a list of migrations that need to be applied to make the database up-to-date
