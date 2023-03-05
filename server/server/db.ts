@@ -50,6 +50,7 @@ export async function initdb(db:knex.Knex<any, unknown[]>):Promise<knex.Knex.Sch
     let migrations = getMigrations(version);
     for(let i in migrations) {
         let migration = await getMigration(migrations[i]);
+        console.log(`Upgrading database (applying ${migrations[i]})`);
         migration.up(schema);
     }
 
