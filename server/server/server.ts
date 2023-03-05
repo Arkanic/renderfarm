@@ -3,6 +3,8 @@ import path from "path";
 
 import database, {DbConnection} from "./db";
 
+import dashboardRouter from "./routes/dashboard";
+
 export interface Context {
     dashboard:express.Application,
     orchestrator:express.Application,
@@ -22,10 +24,14 @@ database("production").then(db => {
     }
 
 
-    // serve static & generated dashboard files
-    dashboard.use(express.static(path.join(__dirname, "../dashboard-build")));
-    dashboard.listen("8080", () => {
-        console.log("Dashboard online");
-    });
+    dashboardRouter(ctx);
 
+
+    // start all of the servers up
+    dashboard.listen("8080", () => {
+        console.log("Dashboard is online");
+    });
+    orchestrator.listen("2254", () => {
+        console.log("Orchestrator server is online");
+    });
 });

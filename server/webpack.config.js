@@ -14,7 +14,7 @@ module.exports = {
     },
 
     entry: {
-        dashboard: relative("./dashboard/ts/index.ts")
+        dashboard: relative("./dashboard/index.ts")
     },
 
     output: {
