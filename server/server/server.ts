@@ -10,7 +10,8 @@ import dashboardRouter from "./routes/dashboard";
 export interface Context {
     dashboard:express.Application,
     api:express.Application,
-    dbc:DbConnection
+    dbc:DbConnection,
+    orchestrator:Orchestrator
 }
 
 database("production").then(db => {
@@ -22,10 +23,13 @@ database("production").then(db => {
     let ctx:Context = {
         dashboard,
         api,
-        dbc: dbConnection
+        dbc: dbConnection,
+        orchestrator:null as unknown as Orchestrator //need to initially set orchestrator to null to prevent recursive definition
     }
 
+    // because of orchestrator:null orchestrator object cannot access itself through ctx - although it should be using `this` anyway
     let orchestrator = new Orchestrator(ctx);
+    ctx.orchestrator = orchestrator;
 
     dashboardRouter(ctx);
 
