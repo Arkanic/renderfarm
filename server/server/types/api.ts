@@ -2,7 +2,7 @@
 
 export interface Response {
     success:boolean,
-    message:string | undefined // error message if it all goes wrong
+    message?:string // error message if it all goes wrong
 }
 export interface Request {
     id:string

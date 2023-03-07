@@ -6,6 +6,7 @@ import database, {DbConnection} from "./db";
 import Orchestrator from "./orchestrator/orchestrator";
 
 import dashboardRouter from "./routes/dashboard";
+import orchestratorRouter from "./routes/orchestrator";
 
 export interface Context {
     dashboard:express.Application,
@@ -31,8 +32,9 @@ database("production").then(db => {
     let orchestrator = new Orchestrator(ctx);
     ctx.orchestrator = orchestrator;
 
+    
+    orchestratorRouter(ctx);
     dashboardRouter(ctx);
-
 
     // start all of the servers up
     dashboard.listen("8080", () => {
