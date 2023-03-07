@@ -1,4 +1,4 @@
-import express, { Application } from "express";
+import express from "express";
 import path from "path";
 
 import {Context} from "../server";
@@ -38,6 +38,15 @@ export default (ctx:Context) => {
         }
 
         res.status(200).json(response);
+    });
+
+    // leave server
+    api.post("/api/leave", (req, res, next) => {
+        if(!valid(proto, req.body, "LeaveRequest")) return next();
+
+        orchestrator.removeRenderNode(req.body.id);
+        
+        res.status(200).json({success: true});
     });
 
     // request has fallen through to this, either due to not existing or being a malformed request
