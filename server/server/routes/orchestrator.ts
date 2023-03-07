@@ -11,7 +11,7 @@ function valid(proto:protocol.ValidatorContext, data:any, policy:string):boolean
 }
 
 export default (ctx:Context) => {
-    const {api, orchestrator} = ctx;
+    const {api, orchestrator, dbc} = ctx;
 
     // create protocol
     let proto = protocol.createValidatorContext("server/types/api.ts");
@@ -21,16 +21,19 @@ export default (ctx:Context) => {
     // following are practical implementations of the api. Requests are checked against the codified api spec in /types/api
 
     // join server
-    api.post("/api/join", (req, res, next) => {
+    api.post("/api/join", async (req, res, next) => {
         if(!valid(proto, req.body, "JoinRequest")) return next(); // skip to error section 
         let data:types.JoinRequest = req.body;
+
+        // get most recent metadata entry
+        let metadata = (await dbc.db("metadata").orderBy("id", "desc").limit(1))[0];
 
         // add render node
         let id = orchestrator.addRenderNode(data.name);
         let response:types.JoinResponse = {
             success: true,
             id,
-            blenderhash: "placeholder",
+            blenderhash: metadata.blenderhash,
             heartbeatinterval: constants.HEARTBEAT_INTERVAL
         }
 
