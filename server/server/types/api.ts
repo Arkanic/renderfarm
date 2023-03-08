@@ -35,6 +35,7 @@ export interface ProjectsIndexResponse extends Response {
     }>
 }
 
+// delete project from renderfarm
 export interface DeleteProjectRequest {
     projectid:string | number
 }
