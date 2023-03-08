@@ -8,6 +8,7 @@ export interface Request {
     id:string
 }
 
+// upload project to renderfarm
 export interface UploadProjectRequest {
     title:string,
     blendfile:string, // relative path to .blend file
@@ -19,6 +20,19 @@ export interface UploadProjectRequest {
 }
 export interface UploadProjectResponse extends Response {
     projectid:string | number
+}
+
+// get a list of projects being rendered by the renderfarm
+export interface ProjectsIndexRequest {
+    unfinishedonly:boolean
+}
+export interface ProjectsIndexResponse extends Response {
+    projects:Array<{
+        id:number | string,
+        title:string,
+        created:number,
+        finished:boolean
+    }>
 }
 
 // request to join renderfarm

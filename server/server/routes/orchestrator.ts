@@ -80,6 +80,29 @@ export default (ctx:Context) => {
         });
     });
 
+    // request an index of projects
+    api.post("/api/projectsindex", async (req, res, next) => {
+        if(!valid(proto, req.body, "ProjectsIndexRequest")) return next();
+        
+        let projects;
+        if(req.body.unfinishedonly) projects = await dbc.db("projects").where({finished: false});
+        else projects = await dbc.db("projects");
+
+        let formattedProjects:Array<{
+            id:number | string,
+            title:string,
+            created:number,
+            finished:boolean
+        }> = projects.map(p => {return {id: p.id, title: p.title, created: p.created, finished: p.finished ? true : false}});
+
+        let response:types.ProjectsIndexResponse = {
+            success: true,
+            projects: formattedProjects
+        }
+
+        res.status(200).json(response);
+    });
+
     // join server
     api.post("/api/join", async (req, res, next) => {
         if(!valid(proto, req.body, "JoinRequest")) return next();
