@@ -10,6 +10,7 @@ export interface Request {
 
 export interface UploadProjectRequest {
     title:string,
+    blendfile:string, // relative path to .blend file
     cutinto:number,
     animation:boolean,
     framestart:number,

@@ -1,4 +1,5 @@
 import express from "express";
+import JSZip, * as JSZipFull from "jszip";
 import path from "path";
 import fs from "fs";
 
@@ -26,12 +27,37 @@ export default (ctx:Context) => {
         let data:types.UploadProjectRequest = req.body;
         if(data.animation && !data.frameend) return next(); // if it is an animation there should be a frameend variable
 
+        // decode zip file
+        let zipData = Buffer.from(data.data, "base64");
+        let zip = new JSZip();
+        try {
+            // make sure the blend file the user claims to exist does exist
+            let foundBlend = false;
+            await zip.loadAsync(zipData);
+            zip.forEach((relativePath:string, zipEntry:JSZipFull.JSZipObject) => {
+                console.log(relativePath);
+                if(relativePath == data.blendfile) foundBlend = true;
+            });
+            if(!foundBlend) {
+                return res.status(400).json({
+                    success: false,
+                    message: ".blend file does not exist in this zip file"
+                });
+            }
+        } catch(err) {
+            return res.status(400).json({
+                success: false,
+                message: "invalid zip file"
+            });
+        }
+
         // insert it into database
         let renderdata = {
             cutinto: data.cutinto,
             animation: data.animation,
             framestart: data.framestart,
-            frameend: 0
+            frameend: 0,
+            blendfile: data.blendfile
         };
         if(data.animation) renderdata.frameend = data.frameend!;
 
@@ -44,7 +70,7 @@ export default (ctx:Context) => {
         });
 
         // write zip project to file
-        fs.writeFileSync(path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${projectId}.zip`), Buffer.from(data.data, "base64").toString("utf-8"));
+        fs.writeFileSync(path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${projectId}.zip`), zipData);
 
         console.log(`Uploaded project ${projectId}, "${data.title}"`);
 
