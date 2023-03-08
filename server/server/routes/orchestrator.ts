@@ -1,5 +1,6 @@
 import express from "express";
 import path from "path";
+import fs from "fs";
 
 import {Context} from "../server";
 import * as protocol from "../protocol";
@@ -16,13 +17,46 @@ export default (ctx:Context) => {
     // create protocol
     let proto = protocol.createValidatorContext("server/types/api.ts");
 
-    api.use(express.json());
+    api.use(express.json({limit: "8gb"}));
 
     // following are practical implementations of the api. Requests are checked against the codified api spec in /types/api
 
+    api.post("/api/uploadproject", async (req, res, next) => {
+        if(!valid(proto, req.body, "UploadProjectRequest")) return next(); // skip to error section 
+        let data:types.UploadProjectRequest = req.body;
+        if(data.animation && !data.frameend) return next(); // if it is an animation there should be a frameend variable
+
+        // insert it into database
+        let renderdata = {
+            cutinto: data.cutinto,
+            animation: data.animation,
+            framestart: data.framestart,
+            frameend: 0
+        };
+        if(data.animation) renderdata.frameend = data.frameend!;
+
+        let renderdataId = await dbc.insert("renderdata", renderdata);
+
+        let projectId = await dbc.insert("projects", {
+            created: Date.now(),
+            title: data.title,
+            renderdata_index: renderdataId
+        });
+
+        // write zip project to file
+        fs.writeFileSync(path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${projectId}.zip`), Buffer.from(data.data, "base64").toString("utf-8"));
+
+        console.log(`Uploaded project ${projectId}, "${data.title}"`);
+
+        res.status(200).json({
+            success: true,
+            projectid: projectId
+        });
+    });
+
     // join server
     api.post("/api/join", async (req, res, next) => {
-        if(!valid(proto, req.body, "JoinRequest")) return next(); // skip to error section 
+        if(!valid(proto, req.body, "JoinRequest")) return next();
         let data:types.JoinRequest = req.body;
 
         // get most recent metadata entry

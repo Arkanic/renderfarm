@@ -30,9 +30,15 @@ database("production").then(async db => {
         orchestrator:null as unknown as Orchestrator //need to initially set orchestrator to null to prevent recursive definition
     }
 
-    console.log("Updating blender binary hash...");
-    // generate sha256 file hash of blender tarball to see if it has changed for clients
     let blenderLocation = `./${constants.DATA_DIR}/blender.tar.xz`;
+    if(!fs.existsSync(blenderLocation)) {
+        console.log("blender.tar.xz not found in /data!!!");
+        console.log("download it from blender.org, later versions can be installed from client.");
+        process.exit(1);
+    }
+
+    console.log("Updating blender binary hash...");
+    // generate sha256 file hash of blender tarball to see if it has changed for clients 
     const blenderTarball = fs.readFileSync(blenderLocation);
     const blenderHash = crypto.createHash("sha256");
     blenderHash.update(blenderTarball);

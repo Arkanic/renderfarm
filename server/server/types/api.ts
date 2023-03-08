@@ -8,6 +8,18 @@ export interface Request {
     id:string
 }
 
+export interface UploadProjectRequest {
+    title:string,
+    cutinto:number,
+    animation:boolean,
+    framestart:number,
+    frameend?:number,
+    data:string
+}
+export interface UploadProjectResponse extends Response {
+    projectid:string | number
+}
+
 // request to join renderfarm
 export interface JoinRequest {
     name:string

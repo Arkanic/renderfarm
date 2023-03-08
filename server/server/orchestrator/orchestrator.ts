@@ -3,6 +3,17 @@ import {nanoid} from "nanoid";
 import {Context} from "../server";
 import RenderNode from "./rendernode";
 
+// chunk format project_frame_row_column
+
+export interface Job {
+    dataid:string,
+    chunkid:string,
+    frame:number,
+    cutinto:number,
+    row:number,
+    column:number
+};
+
 class Orchestrator {
     ctx:Context;
 
