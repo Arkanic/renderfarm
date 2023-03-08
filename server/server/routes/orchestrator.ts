@@ -78,6 +78,8 @@ export default (ctx:Context) => {
             success: true,
             projectid: projectId
         });
+
+        // trigger orchestrator handler here!!!
     });
 
     // request an index of projects
@@ -101,6 +103,28 @@ export default (ctx:Context) => {
         }
 
         res.status(200).json(response);
+    });
+
+    api.post("/api/deleteproject", async (req, res, next) => {
+        if(!valid(proto, req.body, "DeleteProjectRequest")) return next();
+
+        // does the project exist??
+        let projects = await dbc.db("projects").where("id", req.body.projectid);
+        if(projects.length == 0) {
+            return res.status(400).json({
+                success: false,
+                message: "That project doesn't exist!"
+            });
+        }
+
+        // it does, delete it
+        await dbc.deleteById("projects", req.body.projectid);
+
+        res.status(200).json({
+            success: true
+        });
+
+        // trigger orchestrator handler here!!!
     });
 
     // join server

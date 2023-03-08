@@ -35,6 +35,11 @@ export interface ProjectsIndexResponse extends Response {
     }>
 }
 
+export interface DeleteProjectRequest {
+    projectid:string | number
+}
+export interface DeleteProjectResponse extends Response {}
+
 // request to join renderfarm
 export interface JoinRequest {
     name:string
