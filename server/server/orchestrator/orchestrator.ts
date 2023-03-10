@@ -99,11 +99,12 @@ class Orchestrator {
      * 
      * @returns Project id to render (NOT CHUNKID)
      */
-    async assignProject():Promise<string | number> {
+    async assignProject():Promise<string | number | null> {
         // potentially look at load balancing later?
         // priority system?
         // for now just choose a random project
         let rawproj = await this.ctx.dbc.db("projects").where("finished", false);
+        if(rawproj.length == 0) return null;
         return rawproj[Math.floor(rawproj.length * Math.random())].id as number | string;
     }
 
@@ -133,16 +134,21 @@ class Orchestrator {
      */
     async assignJob(projectid:number | string, rendernodeId:string):Promise<Job | null> {
         let project = await this.getProject(projectid);
-        let possibleChunks = this.allPossibleChunks(project);
-
-        possibleChunks = possibleChunks.filter(n => !project.finishedChunks.includes(n));
-        possibleChunks = possibleChunks.filter(n => !this.currentlyRendering.includes(n));
-
-        if(possibleChunks.length < 0) {
-            await this.ctx.dbc.updateById("projects", projectid, {finished: true});
-            console.log(`Finished project ${project.title}`);
+        if(!project) { // no projects available
+            console.log(`Nothing to do for ${this.renderNodes[rendernodeId].name}`);
 
             return null;
+        }
+        let possibleChunks = this.allPossibleChunks(project); // produce every theoretically possible chunk
+        possibleChunks = possibleChunks.filter(n => !project.finishedChunks.includes(n)); // remove all finished chunks from the list
+        possibleChunks = possibleChunks.filter(n => !this.currentlyRendering.includes(n)); // remove all currently rendering chunks from the list
+
+        if(possibleChunks.length == 0) { // the project is done, nothing more to be rendered!
+            //await this.ctx.dbc.updateById("projects", projectid, {finished: true});
+            //console.log(`Finished project ${project.title}`);
+            // this should be handled in finish job - IT IS NOT DONE, just no more AVAILABLE chunks (might still be being rendered).
+
+            return null; // hope for better luck finding a good project next time
         }
 
         this.currentlyRendering.push(possibleChunks[0]);

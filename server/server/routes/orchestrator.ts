@@ -160,7 +160,14 @@ export default (ctx:Context) => {
 
         if(!Object.keys(orchestrator.renderNodes).includes(data.id)) return next();
 
-        let job = await orchestrator.assignJob(await orchestrator.assignProject(), data.id);
+        let project = await orchestrator.assignProject();
+        if(!project) {
+            return res.status(200).json({
+                available: false,
+                waittime: constants.TASK_WAIT_TIME
+            });
+        }
+        let job = await orchestrator.assignJob(project, data.id);
         if(!job) {
             return res.status(200).json({
                 available: false,
