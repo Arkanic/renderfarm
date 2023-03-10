@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Application } from "express";
 import JSZip, * as JSZipFull from "jszip";
 import path from "path";
 import fs from "fs";
@@ -78,8 +78,6 @@ export default (ctx:Context) => {
             success: true,
             projectid: projectId
         });
-
-        // trigger orchestrator handler here!!!
     });
 
     // request an index of projects
@@ -124,7 +122,6 @@ export default (ctx:Context) => {
             success: true
         });
 
-        // trigger orchestrator handler here!!!
     });
 
     // join server
@@ -154,6 +151,35 @@ export default (ctx:Context) => {
         orchestrator.removeRenderNode(req.body.id);
         
         res.status(200).json({success: true});
+    });
+
+    // get job
+    api.post("/api/getjob", async (req, res, next) => {
+        if(!valid(proto, req.body, "GetjobRequest")) return next();
+        let data:types.GetjobRequest = req.body;
+
+        if(!Object.keys(orchestrator.renderNodes).includes(data.id)) return next();
+
+        let job = await orchestrator.assignJob(await orchestrator.assignProject(), data.id);
+        if(!job) {
+            return res.status(200).json({
+                available: false,
+                waittime: constants.TASK_WAIT_TIME
+            });
+        }
+        let response:types.GetjobResponse = {
+            success: true,
+            available: true,
+            dataid: job.projectid,
+            chunkid: job.chunkid,
+            frame: job.frame,
+            cutinto: job.cutinto,
+            row: job.row,
+            column: job.column,
+            blendfile: job.blendfile
+        }
+
+        res.status(200).json(response);
     });
 
     // request has fallen through to this, either due to not existing or being a malformed request

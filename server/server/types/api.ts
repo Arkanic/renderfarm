@@ -59,13 +59,14 @@ export interface LeaveResponse extends Response {}
 export interface GetjobRequest extends Request {}
 export interface GetjobResponse extends Response {
     available:boolean,
-    waittime:number | undefined,
-    dataid:string,
+    waittime?:number,
+    dataid:string | number,
     chunkid:string,
     frame:number,
     cutinto:number,
     row:number,
     column:number,
+    blendfile:string
     // settings unused
 }
 

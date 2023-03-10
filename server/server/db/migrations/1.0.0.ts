@@ -9,7 +9,7 @@ export const up = (schema:Knex.SchemaBuilder) => {
         table.integer("renderdata_index").unsigned().comment("Id of render data in table")
     }).createTable("renderdata", table => {
         table.increments("id").primary();
-        table.string("finished_chunks").defaultTo("[]").notNullable().comment("Stringified javascript array of chunks rendered");
+        table.string("finished_chunks").defaultTo("[]").notNullable().comment("Stringified javascript array of chunks rendered"); // this isn't the best solution (large overhead), but there is no other way to make it frame-uncaring
         table.integer("cutinto").unsigned().notNullable();
         table.boolean("animation").notNullable();
         table.bigInteger("framestart").notNullable().comment("If the render is an still image rather than an animation, this represents the frame to be rendered.");
