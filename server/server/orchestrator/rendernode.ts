@@ -20,6 +20,14 @@ class RenderNode {
         this.working = false;
         this.currentlyDoing = "nothing";
     }
+
+    /**
+     * Does this chunk match what I am meant to be doing?
+     */
+    amICurrentlyDoing(chunk:string):boolean {
+        if(!this.working) return false;
+        return chunk === this.currentlyDoing;
+    }
 }
 
 export default RenderNode;

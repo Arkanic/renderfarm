@@ -1,5 +1,6 @@
-import express, { Application } from "express";
+import express from "express";
 import JSZip, * as JSZipFull from "jszip";
+import im from "imagemagick";
 import path from "path";
 import fs from "fs";
 
@@ -158,7 +159,8 @@ export default (ctx:Context) => {
         if(!valid(proto, req.body, "GetjobRequest")) return next();
         let data:types.GetjobRequest = req.body;
 
-        if(!Object.keys(orchestrator.renderNodes).includes(data.id)) return next();
+        if(!orchestrator.doesNodeExist(data.id)) return next(); // we don't give a custom message here as it gives potential for brute forcing
+        if(orchestrator.renderNodes[data.id].working) return next(); // already has a job
 
         let project = await orchestrator.assignProject();
         if(!project) {
@@ -187,6 +189,50 @@ export default (ctx:Context) => {
         }
 
         res.status(200).json(response);
+    });
+
+    // finish job
+    api.post("/api/finishjob", async (req, res, next) => {
+        if(!valid(proto, req.body, "FinishjobRequest")) return next();
+        let response:types.FinishjobRequest = req.body;
+
+        if(!orchestrator.doesNodeExist(response.id)) return next(); // node doesn't exist, false submission!!!
+        if(!orchestrator.renderNodes[response.id].amICurrentlyDoing(response.chunkid)) { // you aren't meant to be doing this!!
+            return res.status(400).json({
+                success: false,
+                message: "You aren't meant to be doing that task!!!"
+            });
+        }
+
+        try {
+            let image = Buffer.from(response.image, "base64");
+            let location = path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${response.chunkid}.tmp`); // .tmp because we don't know what extension it is yet
+            fs.writeFileSync(location, image); // write to temp file
+            let format:string = await new Promise(resolve => {
+                im.identify(location, (err, features) => { // validate the image - is it real? if so find extension type of image
+                    if(err) throw err;
+                    if(!features.format) throw new Error("Features format does not exist!!!");
+                    console.log(features.format);
+                    resolve(features.format);
+                });
+            });
+
+            fs.renameSync(location, path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${response.chunkid}.${format}`)); // rename it to correct file
+        } catch(err) {
+            let location = path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${response.chunkid}.tmp`);
+            if(fs.existsSync(location)) fs.unlinkSync(location); // if the temp file exists delete it
+
+            return res.status(400).json({
+                success: false,
+                message: "Invalid image"
+            });
+        }
+        
+        orchestrator.renderNodes[response.id].finishJob(); // it has been finished
+        
+        let project = await dbc.getById("projects", response.chunkid.split("_")[0]);
+        let renderdata = await dbc.getById("renderdata", project.renderdata);
+        
     });
 
     // request has fallen through to this, either due to not existing or being a malformed request

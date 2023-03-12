@@ -71,13 +71,13 @@ export interface GetjobResponse extends Response {
 }
 
 // return results of job
-export interface JobfinishRequest extends Request {
+export interface FinishjobRequest extends Request {
     chunkid:string,
     success:boolean,
     statuscode:number,
     image:string
 }
-export interface JobfinishResponse extends Response {}
+export interface FinishjobResponse extends Response {}
 
 // send heartbeat
 export interface HeartbeatRequest extends Request {}

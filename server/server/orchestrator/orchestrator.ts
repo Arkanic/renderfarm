@@ -39,6 +39,13 @@ class Orchestrator {
     }
 
     /**
+     * Does this render node exist?
+     */
+    doesNodeExist(id:string) {
+        return Object.keys(this.renderNodes).includes(id);
+    }
+
+    /**
      * Get a project in a nicely formatted way
      * 
      * @param id project id

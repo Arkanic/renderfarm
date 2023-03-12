@@ -12,6 +12,7 @@ export default async (type:string | undefined):Promise<knex.Knex<any, unknown[]>
     return new Promise((resolve, reject) => {
         if(!fs.existsSync(constants.DATA_DIR)) fs.mkdirSync(constants.DATA_DIR); // if the data folder doesn't exist, make it
         if(!fs.existsSync(path.join(constants.DATA_DIR, constants.PROJECTS_DIR))) fs.mkdirSync(path.join(constants.DATA_DIR, constants.PROJECTS_DIR));
+        if(!fs.existsSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR))) fs.mkdirSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR));
 
         let db:knex.Knex<any, unknown[]> | PromiseLike<knex.Knex<any, unknown[]>>;
         db = knex.default({
