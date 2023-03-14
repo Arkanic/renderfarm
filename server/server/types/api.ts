@@ -74,6 +74,7 @@ export interface GetjobResponse extends Response {
 export interface FinishjobRequest extends Request {
     chunkid:string,
     success:boolean,
+    errormessage?:string,
     statuscode:number,
     image:string
 }

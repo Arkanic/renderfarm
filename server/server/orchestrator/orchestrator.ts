@@ -175,6 +175,16 @@ class Orchestrator {
     }
 
     /**
+     * When a job is finished by a machine
+     * NOTE: this does not mean that the task completed *successfully*, just that it was *finished*
+     */
+    async finishJob(id:string, chunkid:string) {
+        console.log(`Rendernode ${this.renderNodes[id].name} has just finished ${chunkid}`);
+        this.currentlyRendering = this.currentlyRendering.filter(n => n != chunkid); // remove old chunkid from the system
+        this.renderNodes[id].finishJob();
+    }
+
+    /**
      * Add render node to the system, given its name
      * 
      * @param name machine name it provided when launching

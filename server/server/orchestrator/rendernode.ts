@@ -26,7 +26,7 @@ class RenderNode {
      */
     amICurrentlyDoing(chunk:string):boolean {
         if(!this.working) return false;
-        return chunk === this.currentlyDoing;
+        return chunk == this.currentlyDoing;
     }
 }
 

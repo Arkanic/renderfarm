@@ -196,6 +196,7 @@ export default (ctx:Context) => {
         if(!valid(proto, req.body, "FinishjobRequest")) return next();
         let response:types.FinishjobRequest = req.body;
 
+
         if(!orchestrator.doesNodeExist(response.id)) return next(); // node doesn't exist, false submission!!!
         if(!orchestrator.renderNodes[response.id].amICurrentlyDoing(response.chunkid)) { // you aren't meant to be doing this!!
             return res.status(400).json({
@@ -204,35 +205,64 @@ export default (ctx:Context) => {
             });
         }
 
-        try {
-            let image = Buffer.from(response.image, "base64");
-            let location = path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${response.chunkid}.tmp`); // .tmp because we don't know what extension it is yet
-            fs.writeFileSync(location, image); // write to temp file
-            let format:string = await new Promise(resolve => {
-                im.identify(location, (err, features) => { // validate the image - is it real? if so find extension type of image
-                    if(err) throw err;
-                    if(!features.format) throw new Error("Features format does not exist!!!");
-                    console.log(features.format);
-                    resolve(features.format);
+        if(!response.success) {
+            if(!response.errormessage) return next(); // no message = not correct
+
+            // ok now we should write down that error to compare with any later ones - and decide if the project should be stopped
+            let project = await dbc.getById("projects", response.chunkid.split("_")[0]);
+            let renderdata = await dbc.getById("renderdata", project.renderdata_index);
+            let newErrors = JSON.parse(renderdata.errors); // add the finished frame to finished chunks list
+            // if an array for error messages of this chunk does not exist, create it
+            if(!Object.keys(newErrors).includes(response.chunkid)) newErrors[response.chunkid] = [];
+
+            newErrors[response.chunkid].push({
+                id: response.id,
+                statuscode: response.statuscode,
+                errormessage: response.errormessage!
+            });
+
+            await dbc.updateById("renderdata", renderdata.id, {errors: JSON.stringify(newErrors)});
+
+        } else { // no error, continue
+            try {
+                // lets see if the image is actually valid, and not random information
+                let image = Buffer.from(response.image, "base64");
+                let location = path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${response.chunkid}.tmp`); // .tmp because we don't know what extension it is yet
+                fs.writeFileSync(location, image); // write to temp file
+                let format:string = await new Promise(resolve => {
+                    im.identify(location, (err, features) => { // validate the image - is it real? if so find extension type of image
+                        if(err) throw err;
+                        if(!features.format) throw new Error("Features format does not exist!!!");
+                        console.log(features.format);
+                        resolve(features.format);
+                    });
                 });
-            });
 
-            fs.renameSync(location, path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${response.chunkid}.${format}`)); // rename it to correct file
-        } catch(err) {
-            let location = path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${response.chunkid}.tmp`);
-            if(fs.existsSync(location)) fs.unlinkSync(location); // if the temp file exists delete it
+                fs.renameSync(location, path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${response.chunkid}.${format}`)); // rename it to correct file
+            } catch(err) {
+                let location = path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${response.chunkid}.tmp`);
+                if(fs.existsSync(location)) fs.unlinkSync(location); // if the temp file exists delete it
 
-            return res.status(400).json({
-                success: false,
-                message: "Invalid image"
-            });
+                return res.status(400).json({
+                    success: false,
+                    message: "Invalid image"
+                });
+            }
+        
+            let project = await dbc.getById("projects", response.chunkid.split("_")[0]);
+            let renderdata = await dbc.getById("renderdata", project.renderdata_index);
+
+            let newFinishedChunks = JSON.parse(renderdata.finished_chunks); // add the finished frame to finished chunks list
+            newFinishedChunks.push(response.chunkid);
+            await dbc.updateById("renderdata", renderdata.id, {finished_chunks: JSON.stringify(newFinishedChunks)});
+
         }
-        
-        orchestrator.renderNodes[response.id].finishJob(); // it has been finished
-        
-        let project = await dbc.getById("projects", response.chunkid.split("_")[0]);
-        let renderdata = await dbc.getById("renderdata", project.renderdata);
-        
+
+        orchestrator.finishJob(response.id, response.chunkid);
+
+        res.status(200).json({
+            success: true
+        });
     });
 
     // request has fallen through to this, either due to not existing or being a malformed request
