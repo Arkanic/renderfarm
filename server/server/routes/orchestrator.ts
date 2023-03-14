@@ -23,6 +23,17 @@ export default (ctx:Context) => {
 
     // following are practical implementations of the api. Requests are checked against the codified api spec in /types/api
 
+    // whenever a node makes a request reset the death timer of that node
+    api.post("/api/*", (req, res, next) => {
+        if(!req.body.id) return next();
+        if(typeof req.body.id != "string") return next();
+        if(!orchestrator.doesNodeExist(req.body.id)) return next();
+
+        orchestrator.renderNodes[req.body.id].ping();
+
+        next();
+    });
+
     api.post("/api/uploadproject", async (req, res, next) => {
         if(!valid(proto, req.body, "UploadProjectRequest")) return next(); // skip to error section 
         let data:types.UploadProjectRequest = req.body;
@@ -263,6 +274,28 @@ export default (ctx:Context) => {
         res.status(200).json({
             success: true
         });
+    });
+
+    api.post("/api/heartbeat", (req, res, next) => {
+        return res.status(200).json({
+            success: true
+        });
+    });
+
+
+
+    // /DAT data get requests
+    api.get("/dat/blender.tar.xz", (req, res) => {
+        res.status(200).sendFile(path.join(constants.DATA_DIR, constants.PROJECTS_DIR, "blender.tar.xz"), {root: "."});
+    });
+
+    // project files
+    api.get("/dat/projects/:id", (req, res, next) => {
+        let id = parseInt(req.params.id);
+        let filepath = path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${id}.zip`);
+        if(!fs.existsSync(filepath)) return res.status(404).json({success: false, message: "Bad Request"});
+
+        res.status(200).sendFile(filepath, {root: "."});
     });
 
     // request has fallen through to this, either due to not existing or being a malformed request
