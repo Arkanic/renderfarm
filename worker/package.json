@@ -1,0 +1,21 @@
+{
+  "name": "renderfarm-worker",
+  "version": "1.0.0",
+  "description": "Arkanic/renderfarm worker",
+  "main": "worker.ts",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Arkanic/renderfarm.git"
+  },
+  "author": "Arkanic",
+  "bugs": {
+    "url": "https://github.com/Arkanic/renderfarm/issues"
+  },
+  "homepage": "https://github.com/Arkanic/renderfarm#readme",
+  "devDependencies": {
+    "typescript": "^4.9.5"
+  }
+}
