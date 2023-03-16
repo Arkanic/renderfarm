@@ -194,6 +194,11 @@ console.log(`I am ${name}`);
 
     }, PRUNE_PROJECTS_INTERVAL);
 
+    process.on("SIGTERM", async () => {
+        console.log("Received sigterm...");
+        await axios.post(`${surl}/api/leave`, {id: id});
+    });
+
     // the eternal silicon torture begins
     while(true) {
         // first step: ask for job
@@ -234,7 +239,7 @@ console.log(`I am ${name}`);
         console.log(`Rendering ${job.chunkid}`);
         console.log(`File is ${job.blendfile}, split into ${job.cutinto}x${job.cutinto}. I am rendering (${job.row}, ${job.column})`);
 
-        await (new Promise((resolve, reject) => {
+        let resultCode = await (new Promise((resolve, reject) => {
             let blender = spawn(`./${blenderLocation}`, [ // launch blender
                 "-noaudio", // don't do audio, causes some strange crashes
                 "-b", path.join(TEMP_DIR, `${job.dataid}`, job.blendfile), // the blender file is here
@@ -256,9 +261,43 @@ console.log(`I am ${name}`);
             });
 
             blender.on("close", code => {
-                if(code != 0) return reject();
                 resolve(code);
             });
         }));
+
+        let request:types.FinishjobRequest = {
+            id: id,
+            chunkid: job.chunkid,
+            statuscode: resultCode,
+
+        } as unknown as types.FinishjobRequest;
+
+        if(resultCode !== 0) {
+            request.success = false;
+            request.errormessage = "Blender fail";
+
+            await axios.post(`${surl}/api/finishjob`, request);
+        } else {
+            // if it is a file it will have a . somewhere in it ("out.png", vs directiory "out")
+            let files = fs.readdirSync(TEMP_DIR).filter(o => o.split(".").length > 1);
+            if(files.length < 1) {
+                console.log("Out image doesn't exist!");
+                request.success = false;
+                request.errormessage = "Blender didn't produce an image";
+
+                await axios.post(`${surl}/api/finishjob`, request);
+            } else {
+                let file = files.filter(f => f.startsWith("out"))[0]; // our image;
+                let outputImage = fs.readFileSync(path.join(TEMP_DIR, file));
+
+                request.success = true;
+                request.image = outputImage.toString("base64");
+
+                console.log("Sending result image...");
+                await axios.post(`${surl}/api/finishjob`, request);
+            }
+        }
+
+        console.log("Done!!!");
     }
 })();
