@@ -286,7 +286,7 @@ export default (ctx:Context) => {
 
     // /DAT data get requests
     api.get("/dat/blender.tar.xz", (req, res) => {
-        res.status(200).sendFile(path.join(constants.DATA_DIR, constants.PROJECTS_DIR, "blender.tar.xz"), {root: "."});
+        res.status(200).sendFile(path.join(constants.DATA_DIR, "blender.tar.xz"), {root: "."});
     });
 
     // project files
