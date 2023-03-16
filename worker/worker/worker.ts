@@ -15,6 +15,8 @@ const BLENDER_TAR_XZ = "./blender.tar.xz";
 const BLENDER_DIR = "./blender";
 const BLENDER_LOCATION_TXT = "./blender-location.txt";
 const DATA_DIR = "./data";
+const TEMP_DIR = "./temp";
+const PRUNE_PROJECTS_INTERVAL = 1000 * 60 * 30; // every 30 minutes check
 
 console.log("Renderfarm worker");
 
@@ -52,8 +54,30 @@ async function unzipTar(file:string):Promise<void> {
     });
 }
 
+async function unzipZip(file:string, to:string):Promise<void> {
+    return new Promise((resolve, reject) => {
+        const zip = spawn("unzip", [file, "-d", to]);
+
+        zip.stdout.on("data", data => {
+            // response data, into a string, removing the last character (newline)
+            console.log(data.toString().slice(0, -1));
+        });
+
+        zip.stderr.on("data", data => {
+            console.log(data.toString().slice(0, -1));
+        });
+
+        zip.on("close", (code) => {
+            if(code != 0) return reject();
+            resolve();
+        });
+    });
+}
+
+// If any of these required folders do not exist, make them (they will be populated later)
 if(!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
 if(!fs.existsSync(BLENDER_DIR)) fs.mkdirSync(BLENDER_DIR);
+if(!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR);
 
 // first up try to decipher server.txt to find what to connect to
 if(!fs.existsSync(SERVER_TXT)) {
@@ -95,6 +119,7 @@ console.log(`I am ${name}`);
     }
 
     const {id} = joinResponse;
+    console.log(`My id is "${id}"`);
 
     /**
      * Save blender.tar.xz to a file and unzip it
@@ -139,33 +164,101 @@ console.log(`I am ${name}`);
     const blenderLocation = fs.readFileSync(BLENDER_LOCATION_TXT).toString().split("\n")[0];
     console.log(`Blender is at ${blenderLocation}`);
 
+    /**
+     * Prune old project files
+     */
+    setInterval(async () => {
+        console.log("Pruning old projects...");
+        let res = await axios.post(`${surl}/api/projectsindex`, {unfinishedonly: false});
+        let data:types.ProjectsIndexResponse = res.data;
+        if(!data.success) {
+            console.log("Projectsindex fail");
+            console.log(data.message);
+            exit(2);
+        }
+
+        let {projects} = data;
+        let finishedProjects = projects.filter(p => p.finished); // remove unfinished projects
+        for(let i in finishedProjects) {
+            let finishedProject = finishedProjects[i];
+
+            let theoreticalPath = path.join(DATA_DIR, `${finishedProject.id}.zip`);
+            if(fs.existsSync(theoreticalPath)) {
+                console.log(`Deleting finished project files of ${finishedProject.title}`);
+                fs.unlinkSync(theoreticalPath);
+
+                // delete unzipped version
+                fs.rmSync(path.join(TEMP_DIR, `${finishedProject.id}`), {recursive: true, force: true});
+            }
+        }
+
+    }, PRUNE_PROJECTS_INTERVAL);
+
     // the eternal silicon torture begins
     while(true) {
         // first step: ask for job
         let iHaveJob = false;
         let job:types.GetjobResponse = null as unknown as types.GetjobResponse;
         while(!iHaveJob) {
-            try {
-                let res = await axios.post(`${surl}/api/getjob`, {id: id})
-                job = res.data;
-            } catch(err) {
-                console.log(err);
-                exit(1);
-            }
-
-            if(!job.success) {
-                console.log("Getjob fail");
-                exit(2);
-            }
+            let res = await axios.post(`${surl}/api/getjob`, {id: id})
+            job = res.data;
 
             if(job.available) {
-                // ok do stuff now
-                console.log("doing thing");
+                iHaveJob = true; // yes!
             } else {
                 console.log(`No jobs available. Waiting ${Math.floor(job.waittime!/1000)}s before retrying`);
                 await delay(job.waittime!);
-                continue;
             }
         }
+
+        // ok, we have a job now!
+        console.log(`Job Found! I am now doing part ${job.chunkid}`);
+        
+        let theoreticalPath = path.join(DATA_DIR, `${job.dataid}.zip`);
+        if(!fs.existsSync(theoreticalPath)) {
+            console.log("Data for this project not cached, downloading...");
+            let projectdata = await axios.get(`${surl}/dat/projects/${job.dataid}`, {responseType: "arraybuffer"});
+            console.log("Saving...");
+            fs.writeFileSync(theoreticalPath, projectdata.data);
+
+            console.log("Unzipping...");
+            fs.mkdirSync(path.join(TEMP_DIR, `${job.dataid}`)); // if it is a number turn the id into a string
+            await unzipZip(theoreticalPath, path.join(TEMP_DIR, `${job.dataid}`));
+
+            console.log("Done!");
+        } else {
+            console.log("I already have the data for this project cached. continuing...");
+        }
+
+        // we have project file, go for it!
+        console.log(`Rendering ${job.chunkid}`);
+        console.log(`File is ${job.blendfile}, split into ${job.cutinto}x${job.cutinto}. I am rendering (${job.row}, ${job.column})`);
+
+        await (new Promise((resolve, reject) => {
+            let blender = spawn(`./${blenderLocation}`, [ // launch blender
+                "-noaudio", // don't do audio, causes some strange crashes
+                "-b", path.join(TEMP_DIR, `${job.dataid}`, job.blendfile), // the blender file is here
+                "-P", "worker/renderer.py", // the script is here
+                "--", // options for the script
+                TEMP_DIR, // where to save out.whatever
+                job.frame.toString(), // frame
+                job.cutinto.toString(), // what to split into?
+                job.row.toString(), // what row to render
+                job.column.toString() // what column to render
+            ]);
+
+            blender.stdout.on("data", data => {
+                console.log(data.toString().slice(0, -1));
+            });
+
+            blender.stderr.on("data", data => {
+                console.log(data.toString().slice(0, -1));
+            });
+
+            blender.on("close", code => {
+                if(code != 0) return reject();
+                resolve(code);
+            });
+        }));
     }
 })();
