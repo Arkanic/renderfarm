@@ -138,7 +138,34 @@ console.log(`I am ${name}`);
 
     const blenderLocation = fs.readFileSync(BLENDER_LOCATION_TXT).toString().split("\n")[0];
     console.log(`Blender is at ${blenderLocation}`);
+
+    // the eternal silicon torture begins
+    while(true) {
+        // first step: ask for job
+        let iHaveJob = false;
+        let job:types.GetjobResponse = null as unknown as types.GetjobResponse;
+        while(!iHaveJob) {
+            try {
+                let res = await axios.post(`${surl}/api/getjob`, {id: id})
+                job = res.data;
+            } catch(err) {
+                console.log(err);
+                exit(1);
+            }
+
+            if(!job.success) {
+                console.log("Getjob fail");
+                exit(2);
+            }
+
+            if(job.available) {
+                // ok do stuff now
+                console.log("doing thing");
+            } else {
+                console.log(`No jobs available. Waiting ${Math.floor(job.waittime!/1000)}s before retrying`);
+                await delay(job.waittime!);
+                continue;
+            }
+        }
+    }
 })();
-
-// now we will join server
-
