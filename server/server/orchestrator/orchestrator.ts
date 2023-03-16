@@ -169,7 +169,7 @@ class Orchestrator {
             frame: parseInt(possibleChunks[0].split("_")[1]),
             cutinto: project.cutinto,
             row: parseInt(possibleChunks[0].split("_")[2]),
-            column: parseInt(possibleChunks[0].split("_")[2]),
+            column: parseInt(possibleChunks[0].split("_")[3]),
             blendfile: project.blendfile
         }
     }
