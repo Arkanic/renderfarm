@@ -35,7 +35,7 @@ export default (ctx:Context) => {
     let proto = protocol.createValidatorContext("server/types/api.ts");
 
     api.use(cors({
-        origin: process.env.GITPOD_WORKSPACE_ID ? `https://8080-${process.env.GITPOD_WORKSPACE_URL?.slice(8)}` : getIPAddress(),
+        origin: process.env.GITPOD_WORKSPACE_ID ? `https://8080-${process.env.GITPOD_WORKSPACE_URL?.slice(8)}` : `https://${getIPAddress()}`,
         credentials: (process.env.GITPOD_WORKSPACE_ID ? true : false)
     }));
     api.use(express.json({limit: "8gb"}));
