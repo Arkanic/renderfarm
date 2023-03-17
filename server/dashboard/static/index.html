@@ -5,7 +5,22 @@
         <link type="text/css" rel="stylesheet" href="./global.css"/>
     </head>
     <body>
-        <h1>Placeholder</h1>
+        <div class="topnav">
+            <a class="active" id="nav-home">Home</a>
+            <a id="nav-upload">Upload</a>
+            <a id="nav-settings">Settings</a>
+        </div>
+        <div class="content" id="content">
+            <div class="subcontent" id="box-home">
+                <div id="projects-list"></div>
+            </div>
+            <div class="subcontent hidden" id="box-upload">
+                <p>upload</p>
+            </div>
+            <div class="subcontent hidden" id="box-settings">
+                <p>settings</p>
+            </div>
+        </div>
         <script src="./dashboard.js"></script>
     </body>
 </html>

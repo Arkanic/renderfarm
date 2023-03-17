@@ -1,8 +1,10 @@
 import express from "express";
+import cors from "cors";
 import JSZip, * as JSZipFull from "jszip";
 import im from "imagemagick";
 import path from "path";
 import fs from "fs";
+import os from "os";
 
 import {Context} from "../server";
 import * as protocol from "../protocol";
@@ -13,12 +15,29 @@ function valid(proto:protocol.ValidatorContext, data:any, policy:string):boolean
     return protocol.validateClientInput(proto, data, policy);
 }
 
+function getIPAddress():string {
+    let interfaces = os.networkInterfaces();
+    for (let devName in interfaces) {
+        let iface = interfaces[devName]!;
+
+        for (let i = 0; i < iface.length; i++) {
+            let alias = iface[i];
+            if(alias.family === 'IPv4' && alias.address !== '127.0.0.1' && !alias.internal) return alias.address;
+        }
+    }
+    return '0.0.0.0';
+}
+
 export default (ctx:Context) => {
     const {api, orchestrator, dbc} = ctx;
 
     // create protocol
     let proto = protocol.createValidatorContext("server/types/api.ts");
 
+    api.use(cors({
+        origin: process.env.GITPOD_WORKSPACE_ID ? `https://8080-${process.env.GITPOD_WORKSPACE_URL?.slice(8)}` : getIPAddress(),
+        credentials: (process.env.GITPOD_WORKSPACE_ID ? true : false)
+    }));
     api.use(express.json({limit: "8gb"}));
 
     // following are practical implementations of the api. Requests are checked against the codified api spec in /types/api
