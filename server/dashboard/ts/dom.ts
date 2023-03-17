@@ -1,12 +1,29 @@
+import home from "./home";
+
 /**
  * Start up the navbar handler so that clicking the buttons changes what "page" you are on
  */
-export function startNavListener() {
+export async function startNavListener() {
     let boxes = ["home", "upload", "settings"];
     for(let box of boxes) {
         let button = document.getElementById(`nav-${box}`)!;
-        button.addEventListener("click", e => {
+        button.addEventListener("click", async e => {
             if(button.classList.contains("active")) return; // if we are already on this page, ignore
+
+            switch(box) {
+                case "home":
+                    await home();
+                    break;
+                case "upload":
+                    await (async () => {})();
+                    break;
+                case "settings":
+                    await (async () => {})();
+                    break;
+                default:
+                    await home();
+                    break;
+            }
 
             // hide all the other boxes
             for(let otherBox of boxes.filter(b => b != box)) {
