@@ -1,4 +1,5 @@
 import home from "./home";
+import upload from "./upload";
 
 /**
  * Start up the navbar handler so that clicking the buttons changes what "page" you are on
@@ -15,13 +16,13 @@ export async function startNavListener() {
                     await home();
                     break;
                 case "upload":
-                    await (async () => {})();
+                    await upload();
                     break;
                 case "settings":
                     await (async () => {})();
                     break;
                 default:
-                    await home();
+                    await (async () => {})();
                     break;
             }
 

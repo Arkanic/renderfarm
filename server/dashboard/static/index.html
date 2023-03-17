@@ -15,7 +15,45 @@
                 <div id="projects-list"></div>
             </div>
             <div class="subcontent hidden" id="box-upload">
-                <p>upload</p>
+                <div id="upload-upload-box">
+                    <label for="upload-file">File Upload (.zip of blend file and assets): </label>
+                    <input type="file" name="upload-file" id="upload-file" accept="application/zip"/>
+                    <br>
+                    <input type="button" id="upload-upload-submit" value="Next"/>
+                    <br>
+                    <p>Make sure to have the blender file set to relative paths (File > Relative Paths).</p>
+                    <p>All fluid cache, external images, etc should be included in the zip file as well.</p>
+                </div>
+                <div id="upload-loading-box" class="hidden">
+                    <p>Loading...</p>
+                </div>
+                <div id="upload-config-box" class="hidden">
+                    <label for="upload-blendfile">Blender file to be rendered: </label>
+                    <select name="upload-blendfile" id="upload-blendfile"></select>
+                    <br>
+                    <label for="upload-title">Title: </label>
+                    <input type="text" name="upload-title" id="upload-title"></input>
+                    <br>
+                    <label for="upload-animation">Animation: </label>
+                    <input type="checkbox" name="upload-animation" id="upload-animation"/>
+                    <br>
+                    <label for="upload-framestart" id="upload-framestart-label">Frame to render: </label>
+                    <input type="number" name="upload-framestart" id="upload-framestart" value="1"/>
+                    <br>
+                    <label for="upload-frameend" id="upload-frameend-label" class="hidden">End frame of animation: </label>
+                    <input type="number" name="upload-frameend" id="upload-frameend" class="hidden"/>
+                    <br>
+                    <label for="upload-cutinto">Split image into x by x chunks: </label>
+                    <input type="number" name="upload-cutinto" id="upload-cutinto" value="2" max="8"/>
+                    <br>
+                    <input type="button" id="upload-config-submit" value="Submit"/>
+                    <br>
+                    <p>2 Is the recommended split chunks level (this will turn every image into 4 quarters to be rendered)</p>
+                    <p>Having this set too high can actually increase the time taken to render because of all the initialization needed to be done before the start of the render.</p>
+                </div>
+                <div id="upload-uploading-box" class="hidden">
+                    <p>Uploading...</p>
+                </div>
             </div>
             <div class="subcontent hidden" id="box-settings">
                 <p>settings</p>

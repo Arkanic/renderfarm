@@ -20,6 +20,14 @@ body {
     padding-right: 15px;
 }
 
+.content p {
+    padding-top: 5px;
+}
+
+label {
+    font-size: 15px;
+}
+
 .section {
     border: 1px solid #ccc;
     min-height: 64px;
