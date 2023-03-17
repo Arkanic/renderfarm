@@ -23,16 +23,19 @@ export interface UploadProjectResponse extends Response {
 }
 
 // get a list of projects being rendered by the renderfarm
+export interface ProjectsIndexFormattedProject {
+    id:number | string,
+    title:string,
+    created:number,
+    finished:boolean,
+    finishedchunks:number,
+    totalchunks:number
+}
 export interface ProjectsIndexRequest {
     unfinishedonly:boolean
 }
 export interface ProjectsIndexResponse extends Response {
-    projects:Array<{
-        id:number | string,
-        title:string,
-        created:number,
-        finished:boolean
-    }>
+    projects:Array<ProjectsIndexFormattedProject>
 }
 
 // delete project from renderfarm

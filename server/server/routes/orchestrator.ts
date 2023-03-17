@@ -11,6 +11,7 @@ import * as protocol from "../protocol";
 import * as types from "../types/api";
 import constants from "../constants";
 
+
 function valid(proto:protocol.ValidatorContext, data:any, policy:string):boolean {
     return protocol.validateClientInput(proto, data, policy);
 }
@@ -119,12 +120,21 @@ export default (ctx:Context) => {
         if(req.body.unfinishedonly) projects = await dbc.db("projects").where({finished: false});
         else projects = await dbc.db("projects");
 
-        let formattedProjects:Array<{
-            id:number | string,
-            title:string,
-            created:number,
-            finished:boolean
-        }> = projects.map(p => {return {id: p.id, title: p.title, created: p.created, finished: p.finished ? true : false}});
+        let formattedProjects:Array<types.ProjectsIndexFormattedProject> = [];
+
+        for(let i in projects) {
+            let project = projects[i];
+            let renderdata = await dbc.getById("renderdata", project.renderdata_index);
+
+            formattedProjects.push({
+                id: project.id,
+                title: project.title,
+                created: project.created,
+                finished: project.finished ? true : false,
+                finishedchunks: JSON.parse(renderdata.finished_chunks).length,
+                totalchunks: (renderdata.animation ? (renderdata.frameend - renderdata.framestart) : 1) * renderdata.cutinto * renderdata.cutinto
+            } as types.ProjectsIndexFormattedProject);
+        }
 
         let response:types.ProjectsIndexResponse = {
             success: true,
