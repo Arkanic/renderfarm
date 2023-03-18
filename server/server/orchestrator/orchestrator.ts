@@ -2,6 +2,7 @@ import {nanoid} from "nanoid";
 
 import {Context} from "../server";
 import RenderNode from "./rendernode";
+import constants from "../constants";
 
 // chunk format project_frame_row_column
 
@@ -36,6 +37,16 @@ class Orchestrator {
         this.ctx = ctx;
         this.renderNodes = {};
         this.currentlyRendering = [];
+
+        // check for idle workers and DESTROY them with FIRE and FLAMES
+        setInterval(() => {
+            for(let i in this.renderNodes) {
+                if(this.renderNodes[i].isDead()) {
+                    console.log(`Rendernode ${this.renderNodes[i].name} has expired, deleting...`);
+                    this.removeRenderNode(i);
+                }
+            }
+        }, constants.HEARTBEAT_INTERVAL);
     }
 
     /**

@@ -162,7 +162,29 @@ export default (ctx:Context) => {
         res.status(200).json({
             success: true
         });
+    });
 
+    // show currently online workers and what project they are working on
+    api.post("/api/onlineworkers", async (req, res, next) => {
+        if(!valid(proto, req.body, "OnlineWorkersRequest")) return next();
+
+        let renderNodes = Object.values(ctx.orchestrator.renderNodes).map(r => {return {name: r.name, currentProjectId: r.currentlyDoing.split("_")[0]}});
+        let serializedNodes:Array<types.OnlineWorkersWorker> = [];
+        for(let i in renderNodes) {
+            let renderNode = renderNodes[i];
+
+            let project = await ctx.dbc.getById("projects", renderNode.currentProjectId);
+
+            serializedNodes.push({
+                name: renderNode.name,
+                currentlyrendering: project.title
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            workers: serializedNodes
+        });
     });
 
     // join server

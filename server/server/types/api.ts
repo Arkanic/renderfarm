@@ -44,6 +44,16 @@ export interface DeleteProjectRequest {
 }
 export interface DeleteProjectResponse extends Response {}
 
+// see what workers are online
+export interface OnlineWorkersWorker {
+    name:string,
+    currentlyrendering:string // name of what it is currently rendering
+}
+export interface OnlineWorkersRequest {}
+export interface OnlineWorkersResponse extends Response {
+    workers:Array<OnlineWorkersWorker>
+}
+
 // request to join renderfarm
 export interface JoinRequest {
     name:string

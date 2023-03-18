@@ -194,6 +194,10 @@ console.log(`I am ${name}`);
 
     }, PRUNE_PROJECTS_INTERVAL);
 
+    setInterval(async () => {
+        await axios.post(`${surl}/api/heartbeat`, {id: id}); // kindly let them know we are alive
+    }, joinResponse.heartbeatinterval);
+
     process.on("SIGTERM", async () => {
         console.log("Received sigterm...");
         await axios.post(`${surl}/api/leave`, {id: id});

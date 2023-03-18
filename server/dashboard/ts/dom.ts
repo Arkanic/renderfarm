@@ -1,11 +1,12 @@
 import home from "./home";
 import upload from "./upload";
+import workers from "./workers";
 
 /**
  * Start up the navbar handler so that clicking the buttons changes what "page" you are on
  */
 export async function startNavListener() {
-    let boxes = ["home", "upload", "settings"];
+    let boxes = ["home", "workers", "upload", "settings"];
     for(let box of boxes) {
         let button = document.getElementById(`nav-${box}`)!;
         button.addEventListener("click", async e => {
@@ -14,6 +15,9 @@ export async function startNavListener() {
             switch(box) {
                 case "home":
                     await home();
+                    break;
+                case "workers":
+                    await workers();
                     break;
                 case "upload":
                     await upload();
