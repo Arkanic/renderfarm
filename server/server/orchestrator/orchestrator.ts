@@ -201,8 +201,7 @@ class Orchestrator {
         if(possibleChunks.length > 0) return;
 
         // ok so clearly the project is done (all possible frames have been finished)
-        let rawProject = await this.ctx.dbc.getById("projects", project.id);
-        await this.ctx.dbc.updateById("renderdata", rawProject.renderdata_index, {finished: true});
+        await this.ctx.dbc.updateById("projects", project.id, {finished: true});
 
         // call compositor somewhere around here
     }
