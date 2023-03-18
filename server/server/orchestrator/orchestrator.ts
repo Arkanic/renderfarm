@@ -182,6 +182,18 @@ class Orchestrator {
         console.log(`Rendernode ${this.renderNodes[id].name} has just finished ${chunkid}`);
         this.currentlyRendering = this.currentlyRendering.filter(n => n != chunkid); // remove old chunkid from the system
         this.renderNodes[id].finishJob();
+
+        let project = await this.getProject(chunkid.split("_")[0]);
+        let possibleChunks = this.allPossibleChunks(project);
+        possibleChunks = possibleChunks.filter(c => !project.finishedChunks.includes(c));
+
+        if(possibleChunks.length > 0) return;
+
+        // ok so clearly the project is done (all possible frames have been finished)
+        let rawProject = await this.ctx.dbc.getById("projects", project.id);
+        await this.ctx.dbc.updateById("renderdata", rawProject.renderdata_index, {finished: true});
+
+        // call compositor somewhere around here
     }
 
     /**
