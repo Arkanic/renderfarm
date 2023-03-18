@@ -2,6 +2,8 @@ import bpy
 import os
 import sys
 
+bpy.ops.file.make_paths_relative()
+
 # 0 = directory to render to
 # 1 = frame to render
 # 2 = split into how many per side?
