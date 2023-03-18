@@ -1,6 +1,7 @@
 import express from "express";
 import fs from "fs";
 import crypto from "crypto"
+import {nanoid} from "nanoid";
 
 import database, {DbConnection} from "./db";
 import constants from "./constants";
@@ -14,7 +15,8 @@ export interface Context {
     dashboard:express.Application,
     api:express.Application,
     dbc:DbConnection,
-    orchestrator:Orchestrator
+    orchestrator:Orchestrator,
+    serverhash:string
 }
 
 database("production").then(async db => {
@@ -23,11 +25,24 @@ database("production").then(async db => {
     const dashboard = express(); // client dashboard interface
     const api = express(); // api interface for render nodes
 
+    let serverHashLocation = `./${constants.DATA_DIR}/serverhash.txt`;
+    let serverHash = "";
+    if(!fs.existsSync(serverHashLocation)) {
+        console.log("Server hash does not exist...");
+        serverHash = crypto.createHash("sha256").update(nanoid()).digest("hex");
+        fs.writeFileSync(serverHashLocation, serverHash);
+    } else {
+        console.log("Server hash found in file");
+        serverHash = fs.readFileSync(serverHashLocation).toString();
+    }
+    console.log(serverHash);
+
     let ctx:Context = {
         dashboard,
         api,
         dbc: dbConnection,
-        orchestrator:null as unknown as Orchestrator //need to initially set orchestrator to null to prevent recursive definition
+        orchestrator:null as unknown as Orchestrator, //need to initially set orchestrator to null to prevent recursive definition,
+        serverhash: serverHash
     }
 
     let blenderLocation = `./${constants.DATA_DIR}/blender.tar.xz`;
@@ -40,9 +55,7 @@ database("production").then(async db => {
     console.log("Updating blender binary hash...");
     // generate sha256 file hash of blender tarball to see if it has changed for clients 
     const blenderTarball = fs.readFileSync(blenderLocation);
-    const blenderHash = crypto.createHash("sha256");
-    blenderHash.update(blenderTarball);
-    const hash = blenderHash.digest("hex");
+    const hash = crypto.createHash("sha256").update(blenderTarball).digest("hex");
 
     // insert into database
     await dbConnection.insert("metadata", {blenderhash: hash, created: Date.now()});

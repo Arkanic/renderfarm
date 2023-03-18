@@ -61,6 +61,7 @@ export interface JoinRequest {
 export interface JoinResponse extends Response {
     id:string,
     blenderhash:string,
+    serverhash:string, // server's id, useful for when db is purged
     heartbeatinterval:number
 }
 

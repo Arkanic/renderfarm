@@ -67,7 +67,6 @@ export default (ctx:Context) => {
             let foundBlend = false;
             await zip.loadAsync(zipData);
             zip.forEach((relativePath:string, zipEntry:JSZipFull.JSZipObject) => {
-                console.log(relativePath);
                 if(relativePath == data.blendfile) foundBlend = true;
             });
             if(!foundBlend) {
@@ -201,6 +200,7 @@ export default (ctx:Context) => {
             success: true,
             id,
             blenderhash: metadata.blenderhash,
+            serverhash: ctx.serverhash,
             heartbeatinterval: constants.HEARTBEAT_INTERVAL
         }
 

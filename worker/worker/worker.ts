@@ -10,6 +10,7 @@ import axios from "axios";
 import orc from "orc-me";
 
 const SERVER_TXT = "./server.txt";
+const SERVER_HASH_TXT = "./server-hash.txt";
 const NAME_TXT = "./name.txt";
 const BLENDER_TAR_XZ = "./blender.tar.xz";
 const BLENDER_DIR = "./blender";
@@ -74,10 +75,14 @@ async function unzipZip(file:string, to:string):Promise<void> {
     });
 }
 
-// If any of these required folders do not exist, make them (they will be populated later)
-if(!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
-if(!fs.existsSync(BLENDER_DIR)) fs.mkdirSync(BLENDER_DIR);
-if(!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR);
+// make folders required by the code
+function makeFolders() {
+    // If any of these required folders do not exist, make them (they will be populated later)
+    if(!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR);
+    if(!fs.existsSync(BLENDER_DIR)) fs.mkdirSync(BLENDER_DIR);
+    if(!fs.existsSync(TEMP_DIR)) fs.mkdirSync(TEMP_DIR);
+}
+makeFolders();
 
 // first up try to decipher server.txt to find what to connect to
 if(!fs.existsSync(SERVER_TXT)) {
@@ -119,6 +124,22 @@ console.log(`I am ${name}`);
     }
 
     const {id} = joinResponse;
+
+    console.log("Checking server hash");
+    if(fs.existsSync(SERVER_HASH_TXT)) {
+        let oldServerHash = fs.readFileSync(SERVER_HASH_TXT).toString();
+        if(oldServerHash != joinResponse.serverhash) {
+            console.log("It is different, removing old cache...");
+            fs.rmSync(TEMP_DIR, {force: true, recursive: true});
+            fs.rmSync(DATA_DIR, {force: true, recursive: true});
+            makeFolders();
+        } else {
+            console.log("It is the same");
+        }
+    }
+    fs.writeFileSync(SERVER_HASH_TXT, joinResponse.serverhash);
+    console.log(joinResponse.serverhash);
+
     console.log(`My id is "${id}"`);
 
     /**
