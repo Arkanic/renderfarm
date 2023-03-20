@@ -221,7 +221,11 @@ class Orchestrator {
     }
 
     removeRenderNode(id:string) {
-        console.log(`Rendernode "${this.renderNodes[id].name}" is cleanly quitting the pool`);
+        let renderNode = this.renderNodes[id];
+        console.log(`Rendernode "${this.renderNodes[id].name}" is quitting the pool`);
+        if(renderNode.working) { // if they are working we should cancel the task they are doing
+            this.currentlyRendering = this.currentlyRendering.filter(c => c != renderNode.currentlyDoing); // filter it out
+        }
         delete this.renderNodes[id];
     }
 }
