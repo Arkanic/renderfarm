@@ -2,6 +2,11 @@ import bpy
 import os
 import sys
 
+try:
+    os.remove(os.path.join(argv[0], "renderdata")) # let us try to remove the old renderdata
+except OSError:
+    pass
+
 bpy.ops.file.make_paths_relative()
 
 # 0 = directory to render to
@@ -16,8 +21,8 @@ argv = argv[argv.index("--") + 1:]
 scene = bpy.context.scene
 rndr = scene.render
 
-rndr.use_border = True
-rndr.use_crop_to_border = False
+rndr.use_border = True # we only want to render a specific portion of the image
+rndr.use_crop_to_border = False # but at the same time we do not want to crop the image to these dimensions (makes it easier to composite, now images can just be stacked ontop of one another)
 
 rndr.filepath = os.path.join(argv[0], "out")
 
@@ -40,3 +45,9 @@ bpy.ops.render.render(write_still = True)
 #                                                               cut into how many?
 #                                                                 row
 #                                                                   column
+
+# ok it has rendered now, lets save animation framerate
+
+f = open(os.path.join(argv[0], "renderdata"), "w")
+f.write("{}\n{}".format(rndr.fps, rndr.fps_base)) # fps is the frames per second in a render, fps_base is the multiplier
+f.close()

@@ -289,7 +289,7 @@ export default (ctx:Context) => {
             try {
                 // lets see if the image is actually valid, and not random information
                 let image = Buffer.from(response.image, "base64");
-                let location = path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${response.chunkid}.tmp`); // .tmp because we don't know what extension it is yet
+                let location = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${response.chunkid}.tmp`); // .tmp because we don't know what extension it is yet
                 fs.writeFileSync(location, image); // write to temp file
                 let format:string = await new Promise(resolve => {
                     im.identify(location, (err, features) => { // validate the image - is it real? if so find extension type of image
@@ -300,9 +300,11 @@ export default (ctx:Context) => {
                     });
                 });
 
-                fs.renameSync(location, path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${response.chunkid}.${format}`)); // rename it to correct file
+                let theoreticalRenderSubfolder = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${response.chunkid.split("_")[0]}`);
+                if(!fs.existsSync(theoreticalRenderSubfolder)) fs.mkdirSync(theoreticalRenderSubfolder); // if the render subfolder does not exist make it
+                fs.renameSync(location, path.join(theoreticalRenderSubfolder, `${response.chunkid}.${format}`)); // rename it to correct file
             } catch(err) {
-                let location = path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${response.chunkid}.tmp`);
+                let location = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${response.chunkid}.tmp`);
                 if(fs.existsSync(location)) fs.unlinkSync(location); // if the temp file exists delete it
 
                 return res.status(400).json({

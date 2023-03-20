@@ -86,7 +86,7 @@ export default async function upload() {
             framestart: Math.max(parseInt(framestart.value), 1),
             data: base64ArrayBuffer(zipFile)
         };
-        if(request.animation) request.frameend = parseInt(frameend.value);
+        if(request.animation) request.frameend = parseInt(frameend.value) + 1;
 
         configBox.classList.add("hidden");
         uploadingBox.classList.remove("hidden");

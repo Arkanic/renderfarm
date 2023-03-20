@@ -303,8 +303,7 @@ console.log(`I am ${name}`);
 
             await axios.post(`${surl}/api/finishjob`, request);
         } else {
-            // if it is a file it will have a . somewhere in it ("out.png", vs directiory "out")
-            let files = fs.readdirSync(TEMP_DIR).filter(o => o.split(".").length > 1);
+            let files = fs.readdirSync(TEMP_DIR).filter(o => o.startsWith("out"));
             if(files.length < 1) {
                 console.log("Out image doesn't exist!");
                 request.success = false;
@@ -318,8 +317,22 @@ console.log(`I am ${name}`);
                 request.success = true;
                 request.image = outputImage.toString("base64");
 
-                console.log("Sending result image...");
-                await axios.post(`${surl}/api/finishjob`, request);
+                if(!fs.existsSync(path.join(TEMP_DIR, "renderdata"))) {
+                    console.log("Renderdata doesn't exist!");
+                    request.success = false;
+                    request.errormessage = "Renderdata didn't exist for this image";
+
+                    await axios.post(`${surl}/api/finishjob`, request);
+                } else {
+                    let outputImagedata = fs.readFileSync(path.join(TEMP_DIR, "renderdata")).toString();
+                    let [fps, fps_base] = outputImagedata.split("\n").map(s => parseInt(s));
+
+                    request.fps = fps;
+                    request.fpsbase = fps_base;
+
+                    console.log("Sending result image...");
+                    await axios.post(`${surl}/api/finishjob`, request);
+                }
             }
         }
 

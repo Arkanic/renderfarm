@@ -90,7 +90,9 @@ export interface FinishjobRequest extends Request {
     success:boolean,
     errormessage?:string,
     statuscode:number,
-    image:string
+    image:string,
+    fps:number,
+    fpsbase:number
 }
 export interface FinishjobResponse extends Response {}
 
