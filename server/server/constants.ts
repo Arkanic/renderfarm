@@ -1,5 +1,5 @@
 export default {
-    VERSION: "1.0.4",
+    VERSION: "1.0.5",
     DATA_DIR: "data",
     PROJECTS_DIR: "projects",
     RENDERS_DIR: "renders",

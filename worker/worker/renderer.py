@@ -2,11 +2,6 @@ import bpy
 import os
 import sys
 
-try:
-    os.remove(os.path.join(argv[0], "renderdata")) # let us try to remove the old renderdata
-except OSError:
-    pass
-
 bpy.ops.file.make_paths_relative()
 
 # 0 = directory to render to
@@ -46,7 +41,10 @@ bpy.ops.render.render(write_still = True)
 #                                                                 row
 #                                                                   column
 
-# ok it has rendered now, lets save animation framerate
+try:
+    os.remove(os.path.join(argv[0], "renderdata")) # let us try to remove the old renderdata
+except OSError:
+    pass
 
 f = open(os.path.join(argv[0], "renderdata"), "w")
 f.write("{}\n{}".format(rndr.fps, rndr.fps_base)) # fps is the frames per second in a render, fps_base is the multiplier

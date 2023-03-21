@@ -4,6 +4,8 @@ import {Context} from "../server";
 import RenderNode from "./rendernode";
 import constants from "../constants";
 
+import * as compositor from "../compositor/compositor";
+
 // chunk format project_frame_row_column
 
 export interface Project {
@@ -203,7 +205,10 @@ class Orchestrator {
         // ok so clearly the project is done (all possible frames have been finished)
         await this.ctx.dbc.updateById("projects", project.id, {finished: true});
 
-        // call compositor somewhere around here
+        console.log(`Starting composition of "${project.title}"`)
+        compositor.compositeRender(this.ctx, project.id).then(() => {
+            console.log(`Composite of "${project.title}" finished.`);
+        });
     }
 
     /**
