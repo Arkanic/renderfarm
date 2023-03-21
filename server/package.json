@@ -30,7 +30,9 @@
     "jsonschema": "^1.4.1",
     "jszip": "^3.10.1",
     "knex": "^2.4.2",
+    "nan": "^2.17.0",
     "nanoid": "^3.3.4",
+    "node-canvas": "^2.9.0",
     "ts-json-schema-generator": "^1.2.0"
   },
   "devDependencies": {
