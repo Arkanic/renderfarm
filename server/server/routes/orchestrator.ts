@@ -295,7 +295,6 @@ export default (ctx:Context) => {
                     im.identify(location, (err, features) => { // validate the image - is it real? if so find extension type of image
                         if(err) throw err;
                         if(!features.format) throw new Error("Features format does not exist!!!");
-                        console.log(features.format);
                         resolve(features.format);
                     });
                 });

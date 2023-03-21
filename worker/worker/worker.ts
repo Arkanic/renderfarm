@@ -41,11 +41,11 @@ async function unzipTar(file:string):Promise<void> {
 
         tar.stdout.on("data", data => {
             // response data, into a string, removing the last character (newline)
-            console.log(data.toString().slice(0, -1));
+            console.log(data.toString());
         });
 
         tar.stderr.on("data", data => {
-            console.log(data.toString().slice(0, -1));
+            console.log(data.toString());
         });
 
         tar.on("close", (code) => {
@@ -61,11 +61,11 @@ async function unzipZip(file:string, to:string):Promise<void> {
 
         zip.stdout.on("data", data => {
             // response data, into a string, removing the last character (newline)
-            console.log(data.toString().slice(0, -1));
+            console.log(data.toString());
         });
 
         zip.stderr.on("data", data => {
-            console.log(data.toString().slice(0, -1));
+            console.log(data.toString());
         });
 
         zip.on("close", (code) => {
@@ -278,11 +278,11 @@ console.log(`I am ${name}`);
             ]);
 
             blender.stdout.on("data", data => {
-                console.log(data.toString().slice(0, -1));
+                console.log(data.toString());
             });
 
             blender.stderr.on("data", data => {
-                console.log(data.toString().slice(0, -1));
+                console.log(data.toString());
             });
 
             blender.on("close", code => {
