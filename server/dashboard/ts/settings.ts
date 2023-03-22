@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import {apiurl, networkOptions} from "./networking";
 import {base64ArrayBuffer} from "./b64";
 
@@ -8,6 +8,7 @@ let mainBox = document.getElementById("settings-main-box")!;
 let blenderuploadStart = document.getElementById("settings-blenderupload-start")!;
 
 let blenderuploadBox = document.getElementById("settings-blenderupload-box")!;
+let blenderuploadForm = document.getElementById("settings-blenderupload-form")! as HTMLFormElement;
 let blenderfile = document.getElementById("settings-blenderfile")! as HTMLInputElement;
 let blenderuploadSubmit = document.getElementById("settings-blenderupload-submit")! as HTMLInputElement;
 
@@ -34,6 +35,16 @@ export default async function settings() {
             window.location.reload();
         }
 
+        let formData = new FormData(blenderuploadForm);
+
+        let options:AxiosRequestConfig = networkOptions();
+        options.headers = {
+            "Content-Type": "multipart/form-data"
+        }
+
+
+
+        /*
         const fileReader = new FileReader();
         fileReader.readAsArrayBuffer(blenderfile.files![0]);
 
@@ -47,12 +58,12 @@ export default async function settings() {
         }
 
         console.log("Uploading blender...");
-        let res:types.UploadBlenderResponse = (await axios.post(`${apiurl()}/api/uploadblender`, request, networkOptions())).data;
+        let res:types.UploadBlenderResponse = (await axios.post(`${apiurl()}/api/uploadblender`, request, networkOptions())).data;*/
 
-        if(!res.success) {
+        /*if(!res.success) {
             alert(res.message);
             window.location.reload();
-        }
+        }*/
 
         alert("Success!!");
         window.location.reload();

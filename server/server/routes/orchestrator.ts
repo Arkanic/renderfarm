@@ -74,7 +74,7 @@ export default (ctx:Context) => {
             file.mv(path.join(constants.DATA_DIR, `${filename}`), (err) => {
                 if(err) {
                     reject();
-                    next();
+                    return next();
                 }
                 resolve(null);
             }); // store as temp
@@ -136,7 +136,36 @@ export default (ctx:Context) => {
 
 
     
-    
+    api.post("/api/uploadblender", fileUpload(), express.urlencoded({extended: true}), async (req, res, next) => {
+        try {
+            if(!req.files || Object.keys(req.files).length < 1) return next();
+            if(!req.files["settings-blenderfile"]) return next();
+
+            let file:UploadedFile = req.files["settings-blenderfile"] as unknown as any;
+
+            let blendertxzTmp = path.join(constants.DATA_DIR, "blender.tar.xz.tmp");
+            let blendertxz = path.join(constants.DATA_DIR, "blender.tar.xz");
+            // the temp file is so that blender can still be downloaded while the disk is being written to
+            await new Promise((resolve, reject) => {
+                file.mv(blendertxzTmp, err => {
+                    if(err) {
+                        reject();
+                        return next();
+                    }
+                    resolve(null);
+                });
+            });
+
+            fs.unlinkSync(blendertxz);
+            fs.renameSync(blendertxzTmp, blendertxz);
+
+            updateBlenderHash();
+        } catch(err) {
+            return next();
+        }
+
+        res.status(200).json({success: true});
+    });  
 
 
 
@@ -231,26 +260,6 @@ export default (ctx:Context) => {
             success: true,
             workers: serializedNodes
         });
-    });
-
-    api.post("/api/uploadblender", async (req, res, next) => {
-        if(!valid(proto, req.body, "UploadBlenderRequest")) return next();
-        let data:types.UploadBlenderRequest = req.body;
-        try {
-            let blender = Buffer.from(data.data, "base64");
-            let blendertxzTmp = path.join(constants.DATA_DIR, "blender.tar.xz.tmp");
-            let blendertxz = path.join(constants.DATA_DIR, "blender.tar.xz");
-            // the temp file is so that blender can still be downloaded while the disk is being written to
-            fs.writeFileSync(blendertxzTmp, blender);
-            fs.unlinkSync(blendertxz);
-            fs.renameSync(blendertxzTmp, blendertxz);
-
-            updateBlenderHash();
-        } catch(err) {
-            return next();
-        }
-
-        res.status(200).json({success: true});
     });
 
     // join server

@@ -87,7 +87,6 @@ export default async function upload() {
 
     configSubmit?.addEventListener("click", async e => {
         let formData = new FormData(uploadform);
-        console.log(formData);
 
         configBox.classList.add("hidden");
         uploadingBox.classList.remove("hidden");
