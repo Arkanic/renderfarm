@@ -43,13 +43,13 @@ async function zipDir(dir:string, out:string) {
     })
 }
 
-async function framesToMp4(loc:string, format:string, framerate:number) {
+async function framesToMp4(id:string, format:string, framerate:number) {
     console.log("ffmpeg frame converting");
     return new Promise((resolve, reject) => {
         const ffmpeg = spawn("ffmpeg", ["-framerate", `${framerate}`,
-                                        "-i", `"${path.join(loc, "raw", `frame-%d.${format}`)}"`,
-                                        path.join(loc, "finished", "final.mp4")]);
-        
+                                        `-i`, `data/renders/${id}/raw/frame-%d.PNG`,
+                                        `data/renders/${id}/finished/out.mp4`]);
+
         ffmpeg.stdout.on("data", data => {
             console.log(data.toString());
         });
@@ -96,7 +96,7 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
     if(renderdata.animation) { // if it is an animation
         // we need to combine the frames into a video now
         let [fps, fpsbase] = fs.readFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "renderdata")).toString().split("\n").map(s => parseInt(s));
-        await framesToMp4(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`), format, fps * fpsbase); // ok lets stitch
+        await framesToMp4(`${project.id}`, format, fps * fpsbase); // ok lets stitch
     } else {
         // rename image and dump it in
         fs.renameSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw", `frame-${renderdata.framestart}.${format}`), path.join(finishedPath, `final.${format}`));
