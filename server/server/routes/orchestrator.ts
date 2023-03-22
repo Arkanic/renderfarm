@@ -196,15 +196,12 @@ export default (ctx:Context) => {
         if(!valid(proto, req.body, "JoinRequest")) return next();
         let data:types.JoinRequest = req.body;
 
-        // get most recent metadata entry
-        let metadata = (await dbc.db("metadata").orderBy("id", "desc").limit(1))[0];
-
         // add render node
         let id = orchestrator.addRenderNode(data.name);
         let response:types.JoinResponse = {
             success: true,
             id,
-            blenderhash: metadata.blenderhash,
+            blenderhash: ctx.blenderhash,
             serverhash: ctx.serverhash,
             heartbeatinterval: constants.HEARTBEAT_INTERVAL
         }

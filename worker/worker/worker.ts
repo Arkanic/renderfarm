@@ -182,6 +182,8 @@ console.log(`I am ${name}`);
         fs.unlinkSync(BLENDER_TAR_XZ);
         fs.mkdirSync(BLENDER_DIR);
         await downloadProcessBlender();
+    } else {
+        console.log("Blender hash is the same");
     }
 
     const blenderLocation = fs.readFileSync(BLENDER_LOCATION_TXT).toString().split("\n")[0];
