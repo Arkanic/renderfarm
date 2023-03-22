@@ -221,6 +221,17 @@ export default (ctx:Context) => {
         res.status(200).json({success: true});
     });
 
+    api.post("/api/panic", (req, res, next) => {
+        if(!valid(proto, req.body, "PanicRequest")) return next();
+        
+        let data:types.PanicRequest = req.body;
+        if(!orchestrator.doesNodeExist(data.id)) return next();
+
+        console.log(`Worker ${orchestrator.renderNodes[data.id].name} has panicked with the following:\n${data.error}`);
+
+        res.status(200).json({success: true});
+    })
+
     // get job
     api.post("/api/getjob", async (req, res, next) => {
         if(!valid(proto, req.body, "GetjobRequest")) return next();

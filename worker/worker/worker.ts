@@ -125,6 +125,8 @@ console.log(`I am ${name}`);
 
     const {id} = joinResponse;
 
+    try {
+
     console.log("Checking server hash");
     if(fs.existsSync(SERVER_HASH_TXT)) {
         let oldServerHash = fs.readFileSync(SERVER_HASH_TXT).toString();
@@ -338,5 +340,10 @@ console.log(`I am ${name}`);
         }
 
         console.log("Done!!!");
+    }
+
+    } catch(err:any) {
+        await axios.post(`${surl}/api/panic`, {id:id, error:err.toString()});
+        throw err;
     }
 })();
