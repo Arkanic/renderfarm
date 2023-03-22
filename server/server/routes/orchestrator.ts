@@ -1,4 +1,4 @@
-import express from "express";
+import express, { application } from "express";
 import cors from "cors";
 import JSZip, * as JSZipFull from "jszip";
 import im from "imagemagick";
@@ -130,6 +130,7 @@ export default (ctx:Context) => {
                 title: project.title,
                 created: project.created,
                 finished: project.finished ? true : false,
+                rendered: project.rendered ? true : false,
                 finishedchunks: JSON.parse(renderdata.finished_chunks).length,
                 totalchunks: (renderdata.animation ? (renderdata.frameend - renderdata.framestart) : 1) * renderdata.cutinto * renderdata.cutinto
             } as types.ProjectsIndexFormattedProject);
@@ -350,9 +351,35 @@ export default (ctx:Context) => {
     api.get("/dat/projects/:id", (req, res, next) => {
         let id = parseInt(req.params.id);
         let filepath = path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${id}.zip`);
-        if(!fs.existsSync(filepath)) return res.status(404).json({success: false, message: "Bad Request"});
+        if(!fs.existsSync(filepath)) return next();
 
         res.status(200).sendFile(filepath, {root: "."});
+    });
+
+    api.use("/dat/renders/:id/result", async (req, res, next) => {
+        let id = parseInt(req.params.id);
+        if((await ctx.dbc.db("projects").where("id", id)).length < 1) return next();
+        if(!(await ctx.dbc.getById("projects", id)).rendered) return next();
+
+        let folderpath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${id}`, "finished");
+        if(!fs.existsSync(folderpath)) return next();
+
+        let result = fs.readdirSync(folderpath).filter(f => f.startsWith("final"))[0];
+
+        return res.status(200).sendFile(path.join(folderpath, result), {root: "."});
+    });
+
+    api.use("/dat/renders/:id/raw", async (req, res, next) => {
+        let id = parseInt(req.params.id);
+        if((await ctx.dbc.db("projects").where("id", id)).length < 1) return next();
+        if(!(await ctx.dbc.getById("projects", id)).rendered) return next();
+
+        let folderpath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${id}`, "finished");
+        if(!fs.existsSync(folderpath)) return next();
+
+        let result = fs.readdirSync(folderpath).filter(f => f.startsWith("raw"))[0];
+
+        return res.status(200).sendFile(path.join(folderpath, result), {root: "."});
     });
 
     // request has fallen through to this, either due to not existing or being a malformed request

@@ -17,7 +17,12 @@ export default async function home() {
         return;
     }
 
+    let p = document.createElement("p");
+    p.innerHTML = `There are a total of ${projects.projects.length} projects.`;
+    projectsList.appendChild(p);
+
     // ok now lets display all projects
+    projects.projects = projects.projects.reverse(); // newest first
     for(let i = 0; i < projects.projects.length; i++) {
         let project = projects.projects[i];
 
@@ -28,6 +33,23 @@ export default async function home() {
         let title = document.createElement("h4");
         title.innerHTML = project.title;
         section.appendChild(title);
+
+        if(project.rendered) {
+            let resultlink = document.createElement("a");
+            resultlink.href = `${apiurl()}/dat/renders/${project.id}/result`;
+            resultlink.innerHTML = `Finished result`;
+            resultlink.target = "_blank";
+            section.appendChild(resultlink);
+
+            let br = document.createElement("br");
+            section.appendChild(br);
+
+            let rawlink = document.createElement("a");
+            rawlink.href = `${apiurl()}/dat/renders/${project.id}/raw`;
+            rawlink.innerHTML = `Raw frames`;
+            rawlink.target = "_blank";
+            section.appendChild(rawlink);
+        }
 
         let dateCreated = new Date(project.created);
         let info = document.createElement("p");

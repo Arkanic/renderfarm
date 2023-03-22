@@ -48,7 +48,7 @@ async function framesToMp4(id:string, format:string, framerate:number) {
     return new Promise((resolve, reject) => {
         const ffmpeg = spawn("ffmpeg", ["-framerate", `${framerate}`,
                                         `-i`, `data/renders/${id}/raw/frame-%d.PNG`,
-                                        `data/renders/${id}/finished/out.mp4`]);
+                                        `data/renders/${id}/finished/final.mp4`]);
 
         ffmpeg.stdout.on("data", data => {
             console.log(data.toString());
@@ -88,6 +88,7 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
         }
 
         fs.writeFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw", `frame-${frame}.${format}`), canvas.toBuffer());
+        console.log(`Did frame ${frame}`);
     }
 
     let finishedPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished");
@@ -103,7 +104,7 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
     }
 
     // zip raw images, also set rendered to true
-    await zipDir(imagesPath, path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", "raw.zip"));
+    await zipDir(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw"), path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", "raw.zip"));
 
     await ctx.dbc.updateById("projects", project.id, {rendered: true});
 

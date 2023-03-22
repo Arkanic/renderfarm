@@ -23,7 +23,12 @@ let configSubmit = document.getElementById("upload-config-submit");
 
 let uploadingBox = document.getElementById("upload-uploading-box")!;
 
+let done = false;
+
 export default async function upload() {
+    if(done) return;
+    done = true;
+
     let zip:JSZip = null as unknown as JSZip;
     let zipFile:ArrayBuffer = null as unknown as ArrayBuffer;
     uploadSubmit.addEventListener("click", async e => {
