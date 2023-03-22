@@ -102,7 +102,7 @@ let name = "";
 // ok now lets find our name or generate it
 if(!fs.existsSync(NAME_TXT)) {
     console.log("Generating name for myself");
-    name = `${orc()} ${orc()} ${orc()}`; // shrig glur nogg
+    name = `${orc()} ${orc()}`; // shrig glur nogg
     fs.writeFileSync(NAME_TXT, name);
 } else {
     console.log("Finding my name");
