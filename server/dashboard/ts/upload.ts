@@ -23,11 +23,15 @@ let configSubmit = document.getElementById("upload-config-submit");
 
 let uploadingBox = document.getElementById("upload-uploading-box")!;
 
+let uploadform = document.getElementById("uploadform")! as HTMLFormElement;
+
 let done = false;
 
 export default async function upload() {
     if(done) return;
     done = true;
+
+    uploadform.action = `${apiurl()}/form/uploadproject`;
 
     let zip:JSZip = null as unknown as JSZip;
     let zipFile:ArrayBuffer = null as unknown as ArrayBuffer;
@@ -82,8 +86,7 @@ export default async function upload() {
     });
 
     configSubmit?.addEventListener("click", async e => {
-
-        let request:types.UploadProjectRequest = {
+        /*let request:types.UploadProjectRequest = {
             title: title.value || "unnamed",
             blendfile: blendfile.value,
             cutinto: Math.max(parseInt(cutinto.value), 1),
@@ -104,6 +107,6 @@ export default async function upload() {
         }
 
         alert(`Success!`);
-        window.location.reload();
+        window.location.reload();*/
     });
 }

@@ -1,5 +1,7 @@
 import express from "express";
 import cors from "cors";
+import fileUpload, { UploadedFile } from "express-fileupload";
+import bodyParser from "body-parser";
 import JSZip, * as JSZipFull from "jszip";
 import im from "imagemagick";
 import path from "path";
@@ -10,6 +12,7 @@ import {Context, updateBlenderHash} from "../server";
 import * as protocol from "../protocol";
 import * as types from "../types/api";
 import constants from "../constants";
+import { nanoid } from "nanoid";
 
 
 function valid(proto:protocol.ValidatorContext, data:any, policy:string):boolean {
@@ -39,33 +42,54 @@ export default (ctx:Context) => {
         origin: process.env.GITPOD_WORKSPACE_ID ? `https://8080-${process.env.GITPOD_WORKSPACE_URL?.slice(8)}` : `http://${getIPAddress()}:8080`,
         credentials: (process.env.GITPOD_WORKSPACE_ID ? true : false)
     }));
-    api.use(express.json({limit: "8gb"}));
+
 
     // following are practical implementations of the api. Requests are checked against the codified api spec in /types/api
+    // upload project and upload blender are multipart forms as the file content is much too large for js
 
-    // whenever a node makes a request reset the death timer of that node
-    api.post("/api/*", (req, res, next) => {
-        if(!req.body.id) return next();
-        if(typeof req.body.id != "string") return next();
-        if(!orchestrator.doesNodeExist(req.body.id)) return next();
+    
+    api.post("/form/uploadproject", fileUpload(), express.urlencoded({extended: true}), async (req, res, next) => {
+        let data:types.UploadProjectRequest = null as unknown as types.UploadProjectRequest;
+        try {
+            data = {
+                title: req.body["upload-title"],
+                blendfile: req.body["upload-blendfile"],
+                cutinto: parseInt(req.body["upload-cutinto"]),
+                animation: req.body["upload-animation"] ? true : false,
+                framestart: parseInt(req.body["upload-framestart"]),
+                frameend: Number.isNaN(parseInt(req.body["upload-frameend"])) ? 0 : parseInt(req.body["upload-frameend"]) + 1,
+                data: ""
+            }
+        } catch(err) {
+            return next();
+        }
 
-        orchestrator.renderNodes[req.body.id].ping();
+        if(!req.files || Object.keys(req.files).length < 1) return next();
+        if(!req.files["upload-file"]) return next();
 
-        next();
-    });
+        let filename = nanoid();
 
-    api.post("/api/uploadproject", async (req, res, next) => {
-        if(!valid(proto, req.body, "UploadProjectRequest")) return next(); // skip to error section 
-        let data:types.UploadProjectRequest = req.body;
+        let file:UploadedFile = req.files["upload-file"] as unknown as any;
+        
+        await new Promise((resolve, reject) => {
+            file.mv(path.join(constants.DATA_DIR, `${filename}`), (err) => {
+                if(err) {
+                    reject();
+                    next();
+                }
+                resolve(null);
+            }); // store as temp
+        });
+
+
         if(data.animation && !data.frameend) return next(); // if it is an animation there should be a frameend variable
 
-        // decode zip file
-        let zipData = Buffer.from(data.data, "base64");
+
         let zip = new JSZip();
         try {
             // make sure the blend file the user claims to exist does exist
             let foundBlend = false;
-            await zip.loadAsync(zipData);
+            await zip.loadAsync(fs.readFileSync(path.join(constants.DATA_DIR, filename))); // read zip file
             zip.forEach((relativePath:string, zipEntry:JSZipFull.JSZipObject) => {
                 if(relativePath == data.blendfile) foundBlend = true;
             });
@@ -101,7 +125,7 @@ export default (ctx:Context) => {
         });
 
         // write zip project to file
-        fs.writeFileSync(path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${projectId}.zip`), zipData);
+        fs.renameSync(path.join(constants.DATA_DIR, filename), path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${projectId}.zip`));
 
         console.log(`Uploaded project ${projectId}, "${data.title}"`);
 
@@ -109,6 +133,25 @@ export default (ctx:Context) => {
             success: true,
             projectid: projectId
         });
+    });
+
+
+    
+    
+
+
+
+    api.use(express.json({limit: "100mb"}));
+
+    // whenever a node makes a request reset the death timer of that node
+    api.post("/api/*", (req, res, next) => {
+        if(!req.body.id) return next();
+        if(typeof req.body.id != "string") return next();
+        if(!orchestrator.doesNodeExist(req.body.id)) return next();
+
+        orchestrator.renderNodes[req.body.id].ping();
+
+        next();
     });
 
     // request an index of projects
@@ -300,7 +343,7 @@ export default (ctx:Context) => {
             });
         }
 
-        if((await ctx.dbc.db("projects").where("id", response.id)).length !== 0) {
+        if((await ctx.dbc.db("projects").where("id", parseInt(response.chunkid.split("_")[0]))).length !== 0) {
             if(!response.success) {
                 if(!response.errormessage) return next(); // no message = not correct
 
