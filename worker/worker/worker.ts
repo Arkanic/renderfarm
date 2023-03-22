@@ -17,7 +17,7 @@ const BLENDER_DIR = "./blender";
 const BLENDER_LOCATION_TXT = "./blender-location.txt";
 const DATA_DIR = "./data";
 const TEMP_DIR = "./temp";
-const PRUNE_PROJECTS_INTERVAL = 1000 * 60; // every 30 minutes check
+const PRUNE_PROJECTS_INTERVAL = 1000 * 60 * 30; // every 30 minutes check
 
 console.log("Renderfarm worker");
 

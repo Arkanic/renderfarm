@@ -1,4 +1,4 @@
-import express, { application } from "express";
+import express from "express";
 import cors from "cors";
 import JSZip, * as JSZipFull from "jszip";
 import im from "imagemagick";
@@ -6,7 +6,7 @@ import path from "path";
 import fs from "fs";
 import os from "os";
 
-import {Context} from "../server";
+import {Context, updateBlenderHash} from "../server";
 import * as protocol from "../protocol";
 import * as types from "../types/api";
 import constants from "../constants";
@@ -189,6 +189,24 @@ export default (ctx:Context) => {
             success: true,
             workers: serializedNodes
         });
+    });
+
+    api.post("/api/uploadblender", async (req, res, next) => {
+        if(!valid(proto, req.body, "UploadBlenderRequest")) return next();
+        let data:types.UploadBlenderRequest = req.body;
+        try {
+            let blender = Buffer.from(data.data, "base64");
+            let blendertxzTmp = path.join(constants.DATA_DIR, "blender.tar.xz.tmp");
+            let blendertxz = path.join(constants.DATA_DIR, "blender.tar.xz");
+            // the temp file is so that blender can still be downloaded while the disk is being written to
+            fs.writeFileSync(blendertxzTmp, blender);
+            fs.unlinkSync(blendertxz);
+            fs.renameSync(blendertxzTmp, blendertxz);
+
+            updateBlenderHash();
+        } catch(err) {
+            return next();
+        }
     });
 
     // join server

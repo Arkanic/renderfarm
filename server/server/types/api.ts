@@ -55,6 +55,11 @@ export interface OnlineWorkersResponse extends Response {
     workers:Array<OnlineWorkersWorker>
 }
 
+export interface UploadBlenderRequest {
+    data:string
+}
+export interface UploadBlenderResponse extends Response {}
+
 // request to join renderfarm
 export interface JoinRequest {
     name:string
