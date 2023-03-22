@@ -51,6 +51,21 @@ export default async function home() {
             section.appendChild(rawlink);
         }
 
+        let br = document.createElement("br");
+        section.appendChild(br);
+
+        let deleteButton = document.createElement("button");
+        deleteButton.innerHTML = "Delete";
+        deleteButton.addEventListener("click", async () => {
+            let confirmation = prompt("type 'yes' to confirm deletion")?.toLowerCase();
+            if(confirmation === null || confirmation !== "yes") return;
+
+            await axios.post(`${apiurl()}/api/deleteproject`, {projectid: project.id}, networkOptions());
+
+            home();
+        });
+        section.appendChild(deleteButton);
+
         let dateCreated = new Date(project.created);
         let info = document.createElement("p");
         info.classList.add("info");

@@ -156,7 +156,11 @@ export default (ctx:Context) => {
             });
         }
 
-        // it does, delete it
+        // it does, purge
+        console.log(`Deleting project ${projects[0].name}`);
+        fs.rmSync(path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${req.body.projectid}.zip`));
+        fs.rmSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${req.body.projectid}`), {recursive: true, force: true});
+
         await dbc.deleteById("projects", req.body.projectid);
 
         res.status(200).json({
@@ -268,63 +272,66 @@ export default (ctx:Context) => {
             });
         }
 
-        if(!response.success) {
-            if(!response.errormessage) return next(); // no message = not correct
+        if((await ctx.dbc.db("projects").where("id", response.id)).length !== 0) {
+            if(!response.success) {
+                if(!response.errormessage) return next(); // no message = not correct
 
-            // ok now we should write down that error to compare with any later ones - and decide if the project should be stopped
-            let project = await dbc.getById("projects", response.chunkid.split("_")[0]);
-            let renderdata = await dbc.getById("renderdata", project.renderdata_index);
-            let newErrors = JSON.parse(renderdata.errors); // add the finished frame to finished chunks list
-            // if an array for error messages of this chunk does not exist, create it
-            if(!Object.keys(newErrors).includes(response.chunkid)) newErrors[response.chunkid] = [];
+                // ok now we should write down that error to compare with any later ones - and decide if the project should be stopped
+                let project = await dbc.getById("projects", response.chunkid.split("_")[0]);
+                let renderdata = await dbc.getById("renderdata", project.renderdata_index);
+                let newErrors = JSON.parse(renderdata.errors); // add the finished frame to finished chunks list
+                // if an array for error messages of this chunk does not exist, create it
+                if(!Object.keys(newErrors).includes(response.chunkid)) newErrors[response.chunkid] = [];
 
-            newErrors[response.chunkid].push({
-                id: response.id,
-                statuscode: response.statuscode,
-                errormessage: response.errormessage!
-            });
+                newErrors[response.chunkid].push({
+                    id: response.id,
+                    statuscode: response.statuscode,
+                    errormessage: response.errormessage!
+                });
 
-            await dbc.updateById("renderdata", renderdata.id, {errors: JSON.stringify(newErrors)});
+                await dbc.updateById("renderdata", renderdata.id, {errors: JSON.stringify(newErrors)});
 
-        } else { // no error, continue
-            try {
-                // lets see if the image is actually valid, and not random information
-                let image = Buffer.from(response.image, "base64");
-                let location = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${response.chunkid}.tmp`); // .tmp because we don't know what extension it is yet
-                fs.writeFileSync(location, image); // write to temp file
-                let format:string = await new Promise(resolve => {
-                    im.identify(location, (err, features) => { // validate the image - is it real? if so find extension type of image
-                        if(err) throw err;
-                        if(!features.format) throw new Error("Features format does not exist!!!");
-                        resolve(features.format);
+            } else { // no error, continue
+                try {
+                    // lets see if the image is actually valid, and not random information
+                    let image = Buffer.from(response.image, "base64");
+                    let location = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${response.chunkid}.tmp`); // .tmp because we don't know what extension it is yet
+                    fs.writeFileSync(location, image); // write to temp file
+                    let format:string = await new Promise(resolve => {
+                        im.identify(location, (err, features) => { // validate the image - is it real? if so find extension type of image
+                            if(err) throw err;
+                            if(!features.format) throw new Error("Features format does not exist!!!");
+                            resolve(features.format);
+                        });
                     });
-                });
 
-                let theoreticalRenderSubfolder = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${response.chunkid.split("_")[0]}`);
-                if(!fs.existsSync(theoreticalRenderSubfolder)) fs.mkdirSync(theoreticalRenderSubfolder); // if the render subfolder does not exist make it
-                if(!fs.existsSync(path.join(theoreticalRenderSubfolder, "raw"))) fs.mkdirSync(path.join(theoreticalRenderSubfolder, "raw"));
-                fs.renameSync(location, path.join(theoreticalRenderSubfolder, "raw", `${response.chunkid}.${format}`)); // rename it to correct file
+                    let theoreticalRenderSubfolder = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${response.chunkid.split("_")[0]}`);
+                    if(!fs.existsSync(theoreticalRenderSubfolder)) fs.mkdirSync(theoreticalRenderSubfolder); // if the render subfolder does not exist make it
+                    if(!fs.existsSync(path.join(theoreticalRenderSubfolder, "raw"))) fs.mkdirSync(path.join(theoreticalRenderSubfolder, "raw"));
+                    fs.renameSync(location, path.join(theoreticalRenderSubfolder, "raw", `${response.chunkid}.${format}`)); // rename it to correct file
 
-                let fpsStr = `${response.fps}\n${response.fpsbase}`;
-                fs.writeFileSync(path.join(theoreticalRenderSubfolder, "renderdata"), fpsStr); // write renderdata to string
-            } catch(err) {
-                console.log(err);
-                let location = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${response.chunkid}.tmp`);
-                if(fs.existsSync(location)) fs.unlinkSync(location); // if the temp file exists delete it
+                    let fpsStr = `${response.fps}\n${response.fpsbase}`;
+                    fs.writeFileSync(path.join(theoreticalRenderSubfolder, "renderdata"), fpsStr); // write renderdata to string
+                } catch(err) {
+                    console.log(err);
+                    let location = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${response.chunkid}.tmp`);
+                    if(fs.existsSync(location)) fs.unlinkSync(location); // if the temp file exists delete it
 
-                return res.status(400).json({
-                    success: false,
-                    message: "Invalid image"
-                });
-            }
+                    return res.status(400).json({
+                        success: false,
+                        message: "Invalid image"
+                    });
+                }
         
-            let project = await dbc.getById("projects", response.chunkid.split("_")[0]);
-            let renderdata = await dbc.getById("renderdata", project.renderdata_index);
+                let project = await dbc.getById("projects", response.chunkid.split("_")[0]);
+                let renderdata = await dbc.getById("renderdata", project.renderdata_index);
 
-            let newFinishedChunks = JSON.parse(renderdata.finished_chunks); // add the finished frame to finished chunks list
-            newFinishedChunks.push(response.chunkid);
-            await dbc.updateById("renderdata", renderdata.id, {finished_chunks: JSON.stringify(newFinishedChunks)});
-
+                let newFinishedChunks = JSON.parse(renderdata.finished_chunks); // add the finished frame to finished chunks list
+                newFinishedChunks.push(response.chunkid);
+                await dbc.updateById("renderdata", renderdata.id, {finished_chunks: JSON.stringify(newFinishedChunks)});
+            }
+        } else {
+            console.log("Chunk didn't exist");
         }
 
         orchestrator.finishJob(response.id, response.chunkid);
@@ -358,7 +365,7 @@ export default (ctx:Context) => {
 
     api.use("/dat/renders/:id/result", async (req, res, next) => {
         let id = parseInt(req.params.id);
-        if((await ctx.dbc.db("projects").where("id", id)).length < 1) return next();
+        if((await ctx.dbc.db("projects").where("id", id)).length === 0) return next();
         if(!(await ctx.dbc.getById("projects", id)).rendered) return next();
 
         let folderpath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${id}`, "finished");

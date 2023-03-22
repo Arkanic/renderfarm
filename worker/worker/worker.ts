@@ -17,7 +17,7 @@ const BLENDER_DIR = "./blender";
 const BLENDER_LOCATION_TXT = "./blender-location.txt";
 const DATA_DIR = "./data";
 const TEMP_DIR = "./temp";
-const PRUNE_PROJECTS_INTERVAL = 1000 * 60 * 30; // every 30 minutes check
+const PRUNE_PROJECTS_INTERVAL = 1000 * 60; // every 30 minutes check
 
 console.log("Renderfarm worker");
 
@@ -199,20 +199,21 @@ console.log(`I am ${name}`);
         }
 
         let {projects} = data;
-        let finishedProjects = projects.filter(p => p.finished); // remove unfinished projects
-        for(let i in finishedProjects) {
-            let finishedProject = finishedProjects[i];
+        let allUnfinishedProjects = projects.filter(p => !p.finished).map(p => (typeof p.id === "string") ? parseInt(p.id) : p.id); // remove unfinished projects
+        let cachedProjects = fs.readdirSync(TEMP_DIR).map(f => parseInt(f));
+        for(let i in cachedProjects) {
+            let cachedProject = cachedProjects[i];
+            if(allUnfinishedProjects.includes(cachedProject)) continue;
 
-            let theoreticalPath = path.join(DATA_DIR, `${finishedProject.id}.zip`);
+            let theoreticalPath = path.join(DATA_DIR, `${cachedProject}.zip`);
             if(fs.existsSync(theoreticalPath)) {
-                console.log(`Deleting finished project files of ${finishedProject.title}`);
+                console.log(`Deleting finished project files of ${cachedProject}`);
                 fs.unlinkSync(theoreticalPath);
 
                 // delete unzipped version
-                fs.rmSync(path.join(TEMP_DIR, `${finishedProject.id}`), {recursive: true, force: true});
+                fs.rmSync(path.join(TEMP_DIR, `${cachedProject}`), {recursive: true, force: true});
             }
         }
-
     }, PRUNE_PROJECTS_INTERVAL);
 
     setInterval(async () => {

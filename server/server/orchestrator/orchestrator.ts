@@ -196,7 +196,11 @@ class Orchestrator {
         this.currentlyRendering = this.currentlyRendering.filter(n => n != chunkid); // remove old chunkid from the system
         this.renderNodes[id].finishJob();
 
+        // if the project doesn't exist anymore ditch it
+        if((await this.ctx.dbc.db("projects").where("id", parseInt(chunkid.split("_")[0]))).length === 0) return;
+
         let project = await this.getProject(chunkid.split("_")[0]);
+
         let possibleChunks = this.allPossibleChunks(project);
         possibleChunks = possibleChunks.filter(c => !project.finishedChunks.includes(c));
 
