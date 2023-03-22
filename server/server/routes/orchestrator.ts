@@ -1,4 +1,4 @@
-import express, { application } from "express";
+import express from "express";
 import cors from "cors";
 import JSZip, * as JSZipFull from "jszip";
 import im from "imagemagick";
@@ -6,7 +6,7 @@ import path from "path";
 import fs from "fs";
 import os from "os";
 
-import {Context} from "../server";
+import {Context, updateBlenderHash} from "../server";
 import * as protocol from "../protocol";
 import * as types from "../types/api";
 import constants from "../constants";
@@ -191,20 +191,37 @@ export default (ctx:Context) => {
         });
     });
 
+    api.post("/api/uploadblender", async (req, res, next) => {
+        if(!valid(proto, req.body, "UploadBlenderRequest")) return next();
+        let data:types.UploadBlenderRequest = req.body;
+        try {
+            let blender = Buffer.from(data.data, "base64");
+            let blendertxzTmp = path.join(constants.DATA_DIR, "blender.tar.xz.tmp");
+            let blendertxz = path.join(constants.DATA_DIR, "blender.tar.xz");
+            // the temp file is so that blender can still be downloaded while the disk is being written to
+            fs.writeFileSync(blendertxzTmp, blender);
+            fs.unlinkSync(blendertxz);
+            fs.renameSync(blendertxzTmp, blendertxz);
+
+            updateBlenderHash();
+        } catch(err) {
+            return next();
+        }
+
+        res.status(200).json({success: true});
+    });
+
     // join server
     api.post("/api/join", async (req, res, next) => {
         if(!valid(proto, req.body, "JoinRequest")) return next();
         let data:types.JoinRequest = req.body;
-
-        // get most recent metadata entry
-        let metadata = (await dbc.db("metadata").orderBy("id", "desc").limit(1))[0];
 
         // add render node
         let id = orchestrator.addRenderNode(data.name);
         let response:types.JoinResponse = {
             success: true,
             id,
-            blenderhash: metadata.blenderhash,
+            blenderhash: ctx.blenderhash,
             serverhash: ctx.serverhash,
             heartbeatinterval: constants.HEARTBEAT_INTERVAL
         }

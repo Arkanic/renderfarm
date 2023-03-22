@@ -17,7 +17,7 @@ const BLENDER_DIR = "./blender";
 const BLENDER_LOCATION_TXT = "./blender-location.txt";
 const DATA_DIR = "./data";
 const TEMP_DIR = "./temp";
-const PRUNE_PROJECTS_INTERVAL = 1000 * 60; // every 30 minutes check
+const PRUNE_PROJECTS_INTERVAL = 1000 * 60 * 30; // every 30 minutes check
 
 console.log("Renderfarm worker");
 
@@ -182,6 +182,8 @@ console.log(`I am ${name}`);
         fs.unlinkSync(BLENDER_TAR_XZ);
         fs.mkdirSync(BLENDER_DIR);
         await downloadProcessBlender();
+    } else {
+        console.log("Blender hash is the same");
     }
 
     const blenderLocation = fs.readFileSync(BLENDER_LOCATION_TXT).toString().split("\n")[0];

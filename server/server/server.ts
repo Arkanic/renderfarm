@@ -16,7 +16,28 @@ export interface Context {
     api:express.Application,
     dbc:DbConnection,
     orchestrator:Orchestrator,
-    serverhash:string
+    serverhash:string,
+    blenderhash:string
+}
+
+let ctx:Context = null as any as Context;
+
+export function updateBlenderHash():string {
+    let blenderLocation = `./${constants.DATA_DIR}/blender.tar.xz`;
+    if(!fs.existsSync(blenderLocation)) {
+        console.log("blender.tar.xz not found in /data!!!");
+        console.log("download it from blender.org, later versions can be installed from client.");
+        process.exit(1);
+    }
+
+    console.log("Updating blender binary hash...");
+    // generate sha256 file hash of blender tarball to see if it has changed for clients 
+    const blenderTarball = fs.readFileSync(blenderLocation);
+    const hash = crypto.createHash("sha256").update(blenderTarball).digest("hex");
+
+    ctx.blenderhash = hash;
+    console.log(hash);
+    return hash;
 }
 
 database("production").then(async db => {
@@ -37,30 +58,16 @@ database("production").then(async db => {
     }
     console.log(serverHash);
 
-    let ctx:Context = {
+    ctx = {
         dashboard,
         api,
         dbc: dbConnection,
         orchestrator:null as unknown as Orchestrator, //need to initially set orchestrator to null to prevent recursive definition,
-        serverhash: serverHash
+        serverhash: serverHash,
+        blenderhash: "placeholder"
     }
 
-    let blenderLocation = `./${constants.DATA_DIR}/blender.tar.xz`;
-    if(!fs.existsSync(blenderLocation)) {
-        console.log("blender.tar.xz not found in /data!!!");
-        console.log("download it from blender.org, later versions can be installed from client.");
-        process.exit(1);
-    }
-
-    console.log("Updating blender binary hash...");
-    // generate sha256 file hash of blender tarball to see if it has changed for clients 
-    const blenderTarball = fs.readFileSync(blenderLocation);
-    const hash = crypto.createHash("sha256").update(blenderTarball).digest("hex");
-
-    // insert into database
-    await dbConnection.insert("metadata", {blenderhash: hash, created: Date.now()});
-    console.log(hash);
-
+    updateBlenderHash();
 
     // because of orchestrator:null orchestrator object cannot access itself through ctx - although it should be using `this` anyway
     let orchestrator = new Orchestrator(ctx);
