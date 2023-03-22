@@ -157,7 +157,7 @@ export default (ctx:Context) => {
         }
 
         // it does, purge
-        console.log(`Deleting project ${projects[0].name}`);
+        console.log(`Deleting project ${projects[0].title}`);
         fs.rmSync(path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${req.body.projectid}.zip`));
         fs.rmSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${req.body.projectid}`), {recursive: true, force: true});
 
