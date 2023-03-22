@@ -22,6 +22,8 @@ let cutinto = document.getElementById("upload-cutinto")! as HTMLInputElement;
 let configSubmit = document.getElementById("upload-config-submit");
 
 let uploadingBox = document.getElementById("upload-uploading-box")!;
+let progress = document.getElementById("upload-progress")! as HTMLProgressElement;
+let progressMessage = document.getElementById("upload-progress-message")!;
 
 let uploadform = document.getElementById("uploadform")! as HTMLFormElement;
 
@@ -93,6 +95,12 @@ export default async function upload() {
         let options:AxiosRequestConfig = networkOptions();
         options.headers = {
             "Content-Type": "multipart/form-data"
+        }
+
+        options.onUploadProgress = e => {
+            let currentPercentage = Math.round((e.loaded * 100) / e.total!);
+            progress.value = currentPercentage;
+            progressMessage.innerHTML = `Uploading... ${currentPercentage}%`;
         }
         
 
