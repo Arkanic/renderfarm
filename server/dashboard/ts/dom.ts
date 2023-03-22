@@ -1,6 +1,7 @@
 import home from "./home";
 import upload from "./upload";
 import workers from "./workers";
+import settings from "./settings";
 
 /**
  * Start up the navbar handler so that clicking the buttons changes what "page" you are on
@@ -23,7 +24,7 @@ export async function startNavListener() {
                     await upload();
                     break;
                 case "settings":
-                    await (async () => {})();
+                    await settings();
                     break;
                 default:
                     await (async () => {})();

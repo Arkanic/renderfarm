@@ -207,6 +207,8 @@ export default (ctx:Context) => {
         } catch(err) {
             return next();
         }
+
+        res.status(200).json({success: true});
     });
 
     // join server

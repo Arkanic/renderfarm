@@ -32,6 +32,8 @@
                 </div>
                 <div id="upload-loading-box" class="hidden">
                     <p>Loading...</p>
+                    <br>
+                    <img src="loading.gif"/>
                 </div>
                 <div id="upload-config-box" class="hidden">
                     <label for="upload-blendfile">Blender file to be rendered: </label>
@@ -59,10 +61,26 @@
                 </div>
                 <div id="upload-uploading-box" class="hidden">
                     <p>Uploading...</p>
+                    <br>
+                    <img src="loading.gif"/>
                 </div>
             </div>
             <div class="subcontent hidden" id="box-settings">
-                <p>settings</p>
+                <div id="settings-main-box">
+                    <p><a href="#" id="settings-blenderupload-start">Upload new blender.tar.xz</a></p>
+                </div>
+                <div id="settings-blenderupload-box" class="hidden">
+                    <label for="settings-blenderfile">Blender.tar.xz (from blender.org): </label>
+                    <input type="file" id="settings-blenderfile" name="settings-blenderfile" accept=".tar.xz"/>
+                    <br>
+                    <p>Make sure the binary is the same architecture as the worker nodes</p>
+                    <input type="button" id="settings-blenderupload-submit" value="Submit"/>
+                </div>
+                <div id="settings-uploading-box" class="hidden">
+                    <p>Uploading...</p>
+                    <br>
+                    <img src="loading.gif"/>
+                </div>
             </div>
         </div>
         <script src="./dashboard.js"></script>
