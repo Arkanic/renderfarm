@@ -15,8 +15,7 @@ export interface UploadProjectRequest {
     cutinto:number,
     animation:boolean,
     framestart:number,
-    frameend?:number,
-    data:string
+    frameend?:number
 }
 export interface UploadProjectResponse extends Response {
     projectid:string | number

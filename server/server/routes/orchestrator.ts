@@ -57,8 +57,7 @@ export default (ctx:Context) => {
                 cutinto: parseInt(req.body["upload-cutinto"]),
                 animation: req.body["upload-animation"] ? true : false,
                 framestart: parseInt(req.body["upload-framestart"]),
-                frameend: Number.isNaN(parseInt(req.body["upload-frameend"])) ? 0 : parseInt(req.body["upload-frameend"]) + 1,
-                data: ""
+                frameend: Number.isNaN(parseInt(req.body["upload-frameend"])) ? 0 : parseInt(req.body["upload-frameend"]) + 1
             }
         } catch(err) {
             return next();
