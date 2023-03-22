@@ -66,6 +66,12 @@ export interface JoinResponse extends Response {
     heartbeatinterval:number
 }
 
+// panic!!!! dump error somewhere where it can be read
+export interface PanicRequest extends Request {
+    error:string
+}
+export interface PanicResponse extends Response {}
+
 // leave renderfarm cleanly
 export interface LeaveRequest extends Request {}
 export interface LeaveResponse extends Response {}
