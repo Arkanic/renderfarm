@@ -21,14 +21,14 @@
                 <div id="workers-list"></div>
             </div>
             <div class="subcontent hidden" id="box-upload">
-                <form ref="uploadform" id="uploadform" method="post" enctype="multipart/form-data">
+                <form ref="uploadform" id="uploadform" method="post" action="#" enctype="multipart/form-data">
                     <div id="upload-upload-box">
                         <label for="upload-file">File Upload (.zip of blend file and assets): </label>
                         <input type="file" name="upload-file" id="upload-file" accept="application/zip"/>
                         <br>
                         <input type="button" id="upload-upload-submit" value="Next"/>
                         <br>
-                        <p>Make sure to have the blender file set to relative paths (File > Relative Paths).</p>
+                        <p>Make sure to have the blender file set to relative paths (File > External Data > Make All Paths Relative).</p>
                         <p>All fluid cache, external images, etc should be included in the zip file as well.</p>
                     </div>
                     <div id="upload-loading-box" class="hidden">
@@ -55,10 +55,9 @@
                         <label for="upload-cutinto">Split image into x by x chunks: </label>
                         <input type="number" name="upload-cutinto" id="upload-cutinto" value="2" max="8"/>
                         <br>
-                        <input type="submit" id="upload-config-submit" value="Submit"/>
-                        <br>
                         <p>2 Is the recommended split chunks level (this will turn every image into 4 quarters to be rendered)</p>
                         <p>Having this set too high can actually increase the time taken to render because of all the initialization needed to be done before the start of the render.</p>
+                        <input type="button" id="upload-config-submit" value="Submit"/>
                     </div>
                 </form>
                 <div id="upload-uploading-box" class="hidden">

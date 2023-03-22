@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, {AxiosRequestConfig} from "axios";
 import JSZip from "jszip";
 import {apiurl, networkOptions} from "./networking";
 import {base64ArrayBuffer} from "./b64";
@@ -30,8 +30,6 @@ let done = false;
 export default async function upload() {
     if(done) return;
     done = true;
-
-    uploadform.action = `${apiurl()}/form/uploadproject`;
 
     let zip:JSZip = null as unknown as JSZip;
     let zipFile:ArrayBuffer = null as unknown as ArrayBuffer;
@@ -86,20 +84,21 @@ export default async function upload() {
     });
 
     configSubmit?.addEventListener("click", async e => {
-        /*let request:types.UploadProjectRequest = {
-            title: title.value || "unnamed",
-            blendfile: blendfile.value,
-            cutinto: Math.max(parseInt(cutinto.value), 1),
-            animation: animation.checked,
-            framestart: Math.max(parseInt(framestart.value), 1),
-            data: base64ArrayBuffer(zipFile)
-        };
-        if(request.animation) request.frameend = parseInt(frameend.value) + 1;
+        let formData = new FormData(uploadform);
+        console.log(formData);
 
         configBox.classList.add("hidden");
         uploadingBox.classList.remove("hidden");
 
-        let res:types.UploadProjectResponse = (await axios.post(`${apiurl()}/api/uploadproject`, request, networkOptions())).data;
+        let options:AxiosRequestConfig = networkOptions();
+        options.headers = {
+            "Content-Type": "multipart/form-data"
+        }
+        
+
+        let res:types.UploadProjectResponse = (await axios.post(`${apiurl()}/form/uploadproject`,
+                                                                formData,
+                                                                options)).data;
 
         if(!res.success) {
             alert(res.message!);
@@ -107,6 +106,6 @@ export default async function upload() {
         }
 
         alert(`Success!`);
-        window.location.reload();*/
+        window.location.reload();
     });
 }
