@@ -4,6 +4,7 @@
 /server/dashboard-build
 /worker/worker-build
 /server/data
+blender.tar.xz
 /worker/name.txt
 /worker/blender
 /worker/blender.tar.xz
