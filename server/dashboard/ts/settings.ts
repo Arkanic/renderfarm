@@ -6,6 +6,7 @@ import * as types from "./types/api";
 
 let mainBox = document.getElementById("settings-main-box")!;
 let blenderuploadStart = document.getElementById("settings-blenderupload-start")!;
+let cleardbStart = document.getElementById("settings-cleardb-start")!;
 
 let blenderuploadBox = document.getElementById("settings-blenderupload-box")!;
 let blenderuploadForm = document.getElementById("settings-blenderupload-form")! as HTMLFormElement;
@@ -22,6 +23,16 @@ let done = false;
 export default async function settings() {
     if(done) return;
     done = true;
+
+    cleardbStart.addEventListener("click", async () => {
+        alert("This will completely wipe all projects, renders, and crash the server temporarily. Are you sure?");
+        let confirmation = prompt("Type 'yes' to confirm deletion");
+        if(confirmation === null || confirmation !== "yes") return;
+        confirmation = prompt("Are you really really sure? Type 'DIE DIE DIE' to continue");
+        if(confirmation === null || confirmation !== "DIE DIE DIE") return;
+
+        await axios.post(`${apiurl()}/api/cleardb`, {}, networkOptions());
+    });
 
     // now the user wants to upload a blender file
     blenderuploadStart.addEventListener("click", () => {

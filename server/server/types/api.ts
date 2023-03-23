@@ -54,10 +54,13 @@ export interface OnlineWorkersResponse extends Response {
     workers:Array<OnlineWorkersWorker>
 }
 
-export interface UploadBlenderRequest {
-    data:string
-}
+// upload a new version of blender
+export interface UploadBlenderRequest {}
 export interface UploadBlenderResponse extends Response {}
+
+// Purge database with flames and suffering, etc etc
+export interface ClearDBRequest {}
+export interface ClearDBResponse extends Response {}
 
 // request to join renderfarm
 export interface JoinRequest {

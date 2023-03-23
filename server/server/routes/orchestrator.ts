@@ -1,12 +1,12 @@
 import express from "express";
 import cors from "cors";
-import fileUpload, { UploadedFile } from "express-fileupload";
-import bodyParser from "body-parser";
+import fileUpload, {UploadedFile} from "express-fileupload";
 import JSZip, * as JSZipFull from "jszip";
 import im from "imagemagick";
 import path from "path";
 import fs from "fs";
 import os from "os";
+import {exit} from "process";
 
 import {Context, updateBlenderHash} from "../server";
 import * as protocol from "../protocol";
@@ -260,6 +260,22 @@ export default (ctx:Context) => {
             success: true,
             workers: serializedNodes
         });
+    });
+
+    // PURGE!!!! (leaves blender.tar.xz)
+    api.post("/api/cleardb", async (req, res, next) => {
+        if(!valid(proto, req.body, "ClearDBRequest")) return next();
+        let data:types.ClearDBRequest = req.body;
+
+        fs.renameSync(path.join(constants.DATA_DIR, "blender.tar.xz"), "blender.tar.xz");
+        fs.rmSync(constants.DATA_DIR, {force: true, recursive: true}); // HAHAHHA
+        fs.mkdirSync(constants.DATA_DIR);
+        fs.renameSync("blender.tar.xz", path.join(constants.DATA_DIR, "blender.tar.xz"));
+
+        console.log("Purging all data and then quitting!!!!");
+
+        res.status(200).json({success: true, message: "help"});
+        exit(0);
     });
 
     // join server
