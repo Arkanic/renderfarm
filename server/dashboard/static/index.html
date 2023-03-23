@@ -71,7 +71,7 @@
                     <p><a href="#" id="settings-blenderupload-start">Upload new blender.tar.xz</a></p>
                 </div>
                 <div id="settings-blenderupload-box" class="hidden">
-                    <form ref="blenderupload-form" id="blenderupload-form" method="post" action="#" enctype="multipart/form-data">
+                    <form ref="blenderupload-form" id="settings-blenderupload-form" method="post" action="#" enctype="multipart/form-data">
                         <label for="settings-blenderfile">Blender.tar.xz (from blender.org): </label>
                         <input type="file" id="settings-blenderfile" name="settings-blenderfile" accept=".tar.xz"/>
                         <br>
@@ -80,9 +80,9 @@
                     </form>
                 </div>
                 <div id="settings-uploading-box" class="hidden">
-                    <p>Uploading...</p>
+                    <p id="settings-uploading-progress-message">Uploading...</p>
                     <br>
-                    <progress id="blenderupload-progress" value="0" max="100"></progress>
+                    <progress id="settings-uploading-progress" value="0" max="100"></progress>
                 </div>
             </div>
         </div>

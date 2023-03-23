@@ -136,7 +136,7 @@ export default (ctx:Context) => {
 
 
     
-    api.post("/api/uploadblender", fileUpload(), express.urlencoded({extended: true}), async (req, res, next) => {
+    api.post("/form/uploadblender", fileUpload(), express.urlencoded({extended: true}), async (req, res, next) => {
         try {
             if(!req.files || Object.keys(req.files).length < 1) return next();
             if(!req.files["settings-blenderfile"]) return next();
