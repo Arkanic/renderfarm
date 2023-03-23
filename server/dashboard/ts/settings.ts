@@ -28,10 +28,16 @@ export default async function settings() {
         alert("This will completely wipe all projects, renders, and crash the server temporarily. Are you sure?");
         let confirmation = prompt("Type 'yes' to confirm deletion");
         if(confirmation === null || confirmation !== "yes") return;
-        confirmation = prompt("Are you really really sure? Type 'DIE DIE DIE' to continue");
-        if(confirmation === null || confirmation !== "DIE DIE DIE") return;
+
+        let listOfFunnyWords = ["DIE DIE DIE", "KILL", "DEATH", "BURN IT ALL", "please work"];
+        let word = listOfFunnyWords[Math.floor(Math.random() * listOfFunnyWords.length)];
+
+        confirmation = prompt(`Are you really really sure? Type '${word}' to continue`);
+        if(confirmation === null || confirmation !== word) return;
 
         await axios.post(`${apiurl()}/api/cleardb`, {}, networkOptions());
+
+        alert("Done!\nHave a nice day")
     });
 
     // now the user wants to upload a blender file
