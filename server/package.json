@@ -10,7 +10,8 @@
     "sbuild": "tsc",
     "cbuild": "webpack --config ./webpack.config.js --progress && cp -r ./dashboard/static/* ./dashboard-build",
     "start": "node ./server-build/server.js",
-    "quick": "npm run build && npm run start"
+    "quick": "npm run build && npm run start",
+    "package": "zip -r ../server.zip ."
   },
   "repository": {
     "type": "git",

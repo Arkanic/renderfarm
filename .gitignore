@@ -12,3 +12,5 @@ blender.tar.xz
 /worker/data
 /worker/temp
 /worker/server-hash.txt
+server.zip
+worker.zip
