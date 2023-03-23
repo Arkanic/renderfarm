@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, {AxiosRequestConfig} from "axios";
 import JSZip from "jszip";
 import {apiurl, networkOptions} from "./networking";
 import {base64ArrayBuffer} from "./b64";
@@ -22,6 +22,10 @@ let cutinto = document.getElementById("upload-cutinto")! as HTMLInputElement;
 let configSubmit = document.getElementById("upload-config-submit");
 
 let uploadingBox = document.getElementById("upload-uploading-box")!;
+let progress = document.getElementById("upload-progress")! as HTMLProgressElement;
+let progressMessage = document.getElementById("upload-progress-message")!;
+
+let uploadform = document.getElementById("uploadform")! as HTMLFormElement;
 
 let done = false;
 
@@ -82,21 +86,26 @@ export default async function upload() {
     });
 
     configSubmit?.addEventListener("click", async e => {
-
-        let request:types.UploadProjectRequest = {
-            title: title.value || "unnamed",
-            blendfile: blendfile.value,
-            cutinto: Math.max(parseInt(cutinto.value), 1),
-            animation: animation.checked,
-            framestart: Math.max(parseInt(framestart.value), 1),
-            data: base64ArrayBuffer(zipFile)
-        };
-        if(request.animation) request.frameend = parseInt(frameend.value) + 1;
+        let formData = new FormData(uploadform);
 
         configBox.classList.add("hidden");
         uploadingBox.classList.remove("hidden");
 
-        let res:types.UploadProjectResponse = (await axios.post(`${apiurl()}/api/uploadproject`, request, networkOptions())).data;
+        let options:AxiosRequestConfig = networkOptions();
+        options.headers = {
+            "Content-Type": "multipart/form-data"
+        }
+
+        options.onUploadProgress = e => {
+            let currentPercentage = Math.round((e.loaded * 100) / e.total!);
+            progress.value = currentPercentage;
+            progressMessage.innerHTML = `Uploading... ${currentPercentage}%`;
+        }
+        
+
+        let res:types.UploadProjectResponse = (await axios.post(`${apiurl()}/form/uploadproject`,
+                                                                formData,
+                                                                options)).data;
 
         if(!res.success) {
             alert(res.message!);

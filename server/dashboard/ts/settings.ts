@@ -1,4 +1,4 @@
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
 import {apiurl, networkOptions} from "./networking";
 import {base64ArrayBuffer} from "./b64";
 
@@ -8,10 +8,14 @@ let mainBox = document.getElementById("settings-main-box")!;
 let blenderuploadStart = document.getElementById("settings-blenderupload-start")!;
 
 let blenderuploadBox = document.getElementById("settings-blenderupload-box")!;
+let blenderuploadForm = document.getElementById("settings-blenderupload-form")! as HTMLFormElement;
 let blenderfile = document.getElementById("settings-blenderfile")! as HTMLInputElement;
 let blenderuploadSubmit = document.getElementById("settings-blenderupload-submit")! as HTMLInputElement;
 
 let uploadingBox = document.getElementById("settings-uploading-box")!;
+let uploadingProgress = document.getElementById("settings-uploading-progress")! as HTMLProgressElement;
+let uploadingProgressMessage = document.getElementById("settings-uploading-progress-message")!;
+
 
 let done = false;
 
@@ -34,21 +38,22 @@ export default async function settings() {
             window.location.reload();
         }
 
-        const fileReader = new FileReader();
-        fileReader.readAsArrayBuffer(blenderfile.files![0]);
+        let formData = new FormData(blenderuploadForm);
 
-        let blenderTarXz:ArrayBuffer = await new Promise(resolve => {fileReader.onload = e => {
-            resolve(fileReader.result as unknown as ArrayBuffer);
-        }});
-
-        console.log("Converting blender...");
-        let request:types.UploadBlenderRequest = {
-            data: base64ArrayBuffer(blenderTarXz)
+        let options:AxiosRequestConfig = networkOptions();
+        options.headers = {
+            "Content-Type": "multipart/form-data"
         }
 
-        console.log("Uploading blender...");
-        let res:types.UploadBlenderResponse = (await axios.post(`${apiurl()}/api/uploadblender`, request, networkOptions())).data;
+        options.onUploadProgress = e => {
+            let currentPercentage = Math.round((e.loaded * 100) / e.total!);
+            uploadingProgress.value = currentPercentage;
+            uploadingProgressMessage.innerHTML = `Uploading... ${currentPercentage}%`;
+        }
 
+        let res:types.UploadProjectResponse = (await axios.post(`${apiurl()}/form/uploadblender`,
+                                                                formData,
+                                                                options)).data;
         if(!res.success) {
             alert(res.message);
             window.location.reload();
