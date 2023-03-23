@@ -85,11 +85,17 @@ export default (ctx:Context) => {
 
 
         let zip = new JSZip();
+        let unzippedSizes:any = [];
         try {
             // make sure the blend file the user claims to exist does exist
             let foundBlend = false;
             await zip.loadAsync(fs.readFileSync(path.join(constants.DATA_DIR, filename))); // read zip file
             zip.forEach((relativePath:string, zipEntry:JSZipFull.JSZipObject) => {
+                unzippedSizes.push(new Promise(async (resolve) => {
+                    let ab = await zip.file(relativePath)!.async("arraybuffer");
+                    let sum = ab.byteLength;
+                    resolve(sum);
+                }));
                 if(relativePath == data.blendfile) foundBlend = true;
             });
             if(!foundBlend) {
@@ -105,13 +111,22 @@ export default (ctx:Context) => {
             });
         }
 
+        await Promise.all(unzippedSizes);
+        let totalSize = 0;
+        for(let unzippedSize of unzippedSizes) {
+            totalSize += await unzippedSize;
+        }
+
+        console.log(`Unzipped size of project is ${(totalSize / 1000000).toFixed(2)}mb`);
+
         // insert it into database
         let renderdata = {
             cutinto: data.cutinto,
             animation: data.animation,
             framestart: data.framestart,
             frameend: 0,
-            blendfile: data.blendfile
+            blendfile: data.blendfile,
+            size: totalSize
         };
         if(data.animation) renderdata.frameend = data.frameend!;
 
@@ -203,7 +218,8 @@ export default (ctx:Context) => {
                 finished: project.finished ? true : false,
                 rendered: project.rendered ? true : false,
                 finishedchunks: JSON.parse(renderdata.finished_chunks).length,
-                totalchunks: (renderdata.animation ? (renderdata.frameend - renderdata.framestart) : 1) * renderdata.cutinto * renderdata.cutinto
+                totalchunks: (renderdata.animation ? (renderdata.frameend - renderdata.framestart) : 1) * renderdata.cutinto * renderdata.cutinto,
+                size: renderdata.size
             } as types.ProjectsIndexFormattedProject);
         }
 

@@ -51,8 +51,9 @@ export default async function home() {
             section.appendChild(rawlink);
         }
 
-        let br = document.createElement("br");
-        section.appendChild(br);
+        let size = document.createElement("p");
+        size.innerHTML = `Size: ${(project.size / 1000000).toFixed(2)}mb`;
+        section.appendChild(size);
 
         let deleteButton = document.createElement("button");
         deleteButton.innerHTML = "Delete";
