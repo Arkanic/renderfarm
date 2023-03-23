@@ -16,9 +16,11 @@ export default async function home() {
 
         return;
     }
+    
+    let totalSize = projects.reduce((a, b) => a.size + b.size);
 
     let p = document.createElement("p");
-    p.innerHTML = `There are a total of ${projects.projects.length} projects.`;
+    p.innerHTML = `There are a total of ${projects.projects.length} projects, taking up ${(totalSize / 1000000000).toFixed(3)}gb of storage.`;
     projectsList.appendChild(p);
 
     // ok now lets display all projects
