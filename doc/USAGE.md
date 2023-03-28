@@ -32,6 +32,12 @@ Once a project has finished rendering, it will appear greyed out. Once the finis
 - "Finished Result" contains a direct link to the image file (if it is a single frame being rendered) or an mp4 video (if a video is being rendered)
 - "Raw Frames" contains a direct link to a .zip file containing all of the image "chunks" (directly rendered by the workers) that have not been stitched together in any way. The frames follow the format of `<project id>-<frame number>-<row rendered>-<column rendered>.<image format>`. The purpose of this is for people who have very specific image requirements that might get mangled by the compositor stitching the frames together. For normal use you won't need this file.
 
+#### Workers Page
+
+This page displays all the currently online workers, and what they are currently rendering. The workers are displayed as per their name. To customize the names of the workers, see [install.md](./INSTALL.md).
+
+![screenshot of the workers page in the dashboard](./img/worker-page.png)
+
 #### Upload Page
 
 This page lets you upload a project to the renderfarm to be rendered.
@@ -118,3 +124,18 @@ Cutinto is mainly useful for distributing a complex render that is a single fram
 Once the upload has completed you will get a prompt like this. When you click ok the page will reload, and you should see your new project in the list of currently rendering projects.
 
 ![dashboard after project is uploaded](./img/home-page.png)
+
+
+#### Settings Page
+
+![screenshot of settings page on the dashboard](./img/settings-page.png)
+
+From here you can:
+
+##### Upload a new `blender.tar.xz`
+
+If a new blender version comes out you can use this option to upload a new blender.tar.xz file from blender.org. Make sure the architecture of the download is the same architecture as what the workers use.
+
+##### Purge the database
+
+If thinks get really broken, you can delete the entire database and crash the renderfarm. **NOTE:** this will delete all of the renders, all projects, and all progress on unfinished scenes! use at your own risk!!!
