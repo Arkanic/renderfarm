@@ -113,14 +113,19 @@ console.log(`I am ${name}`);
 // main code body, async wrapper so we can use neat await
 (async () => {
     let joinResponse:types.JoinResponse = null as unknown as types.JoinResponse;
-    try {
-        joinResponse = (await axios.post(`${surl}/api/join`, {
-            name
-        })).data;
-    } catch(err:any) {
-        console.log("Can't connect to server. sleeping for one minute then quit.");
-        await delay(1000 * 60); // 1 minute
-        exit(1);
+    let joinResponded = false;
+    while(!joinResponded) {
+        try {
+            joinResponse = (await axios.post(`${surl}/api/join`, {
+                name
+            })).data;
+        } catch(err:any) {
+            console.log("Can't connect to server. sleeping for one minute then retry.");
+            await delay(1000 * 60); // 1 minute
+            continue;
+        }
+
+        joinResponded = true; // didn't continue, must work
     }
 
     const {id} = joinResponse;
