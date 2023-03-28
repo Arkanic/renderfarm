@@ -6,8 +6,8 @@ All relevant documentation should be found here.
 
 [Installation](INSTALL.md)
 
-[Typical Layout](LAYOUT.md)
-
 [Usage](USAGE.md)
+
+[Typical Layout](LAYOUT.md)
 
 [FAQ](FAQ.md)
