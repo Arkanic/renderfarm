@@ -34,3 +34,59 @@ Once a project has finished rendering, it will appear greyed out. Once the finis
 
 #### Upload Page
 
+This page lets you upload a project to the renderfarm to be rendered.
+
+##### Creating a zip file for the renderfarm
+
+Projects are uploaded as a .zip file because it is the best way to preserve the assets and file structures of a render. If only .blend files were uploaded, it would be impossible to render the scene if the file used external files like textures and multiple imported blend objects.
+
+###### Building projects for the renderfarm
+
+For all the blend files in your project, open them and go `File > External Data > Make All Paths Relative`. Then save the file. This setting changes how blender stores the pathnames for external assets. For example, a file that is stored in "C:/Users/Bob/Documents/blender/textues/funny.png" will now be stored as "./textures/funny.png". The purpose of this is to make the blender file not relevant to the system it is being rendered on, as the prior path is only valid for the one machine it was created on.
+
+You should make sure your blender project has a folder structure where all the textures are in child folders to the blender file. This means that your folder structure should look something like the following:
+
+```
+monkey-project
+    |
+    __ monkey.blend
+    __ assets
+        |
+        __ fur_16k.hdr
+        __ tree.png
+        __ background_16k.hdr
+    __ files
+        |
+        __ ape.blend
+```
+
+You don't have to order your project exactly like this, but the purpose is to illustrate how you should have all your files in once place so that the parent folder (in this case `monkey-project`) can be zipped neatly without any unrelated files. If you had a project that looked something like the following:
+
+```
+blender
+    |
+    __ textures
+        |
+        __ texture-for-monkey.png
+        __ completely-unrelated-12gb-file.zip
+    __ blend
+        |
+        __ monkey.blend
+        __ other-project.blend
+```
+
+it cannot be neatly zipped without including other unrelated files which will bloat the zip file.
+
+Zip the folder for upload. On windows this can be achieved by Right Click > Send To > Compressed (Zipped) Folder. Make sure that all the assets needed will be inside the zip file.
+
+Visit the renderfarm dashboard and click "upload". You should see the following screen:
+
+![dashboard upload page](./img/upload-page.png)
+
+Click on the button to upload your zipped blender file (with all assets), and click next. You will now see this page:
+
+![dashboard upload configuration](./img/upload-picture.png)
+
+- **Blender file to be rendered**: This is a dropdown menu that shows all of the .blend files in your zip folder. Select the blend file that is your main project.
+- **Title**: This is just to be able to clearly tell which project is which on the dashboard
+- **Animation**: This checkbox 
