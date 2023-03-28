@@ -87,7 +87,7 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
             }
         }
 
-        fs.writeFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw", `frame-${frame}.${format}`), canvas.toBuffer());
+        fs.writeFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", `frame-${frame}.${format}`), canvas.toBuffer());
         console.log(`Did frame ${frame}`);
     }
 
