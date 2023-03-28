@@ -274,6 +274,8 @@ console.log(`I am ${name}`);
         console.log(`Rendering ${job.chunkid}`);
         console.log(`File is ${job.blendfile}, split into ${job.cutinto}x${job.cutinto}. I am rendering (${job.row}, ${job.column})`);
 
+        let tempLog = "";
+
         let resultCode = await (new Promise((resolve, reject) => {
             let blender = spawn(`./${blenderLocation}`, [ // launch blender
                 "-noaudio", // don't do audio, causes some strange crashes
@@ -289,16 +291,20 @@ console.log(`I am ${name}`);
 
             blender.stdout.on("data", data => {
                 console.log(data.toString());
+                tempLog += data.toString();
             });
 
             blender.stderr.on("data", data => {
                 console.log(data.toString());
+                tempLog += data.toString();
             });
 
             blender.on("close", code => {
                 resolve(code);
             });
         }));
+
+        console.log("Blender finished");
 
         let request:types.FinishjobRequest = {
             id: id,
@@ -308,12 +314,21 @@ console.log(`I am ${name}`);
         } as unknown as types.FinishjobRequest;
 
         if(resultCode !== 0) {
+            console.log("Blender fail");
+
             request.success = false;
-            request.errormessage = "Blender fail";
+            request.errormessage = tempLog;
+
+            request.image = "placeholder";
+            request.fps = 0;
+            request.fpsbase = 0;
 
             await axios.post(`${surl}/api/finishjob`, request);
         } else {
+            console.log("Blender success");
+
             let files = fs.readdirSync(TEMP_DIR).filter(o => o.startsWith("out"));
+            console.log(files);
             if(files.length < 1) {
                 console.log("Out image doesn't exist!");
                 request.success = false;

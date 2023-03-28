@@ -43,6 +43,22 @@ label {
     font-size: 12px;
 }
 
+.terminal {
+    height: 400px;
+    width: 75%;
+    border: 1px solid white;
+    background-color: black;
+    font-family: monospace;
+    overflow: auto;
+}
+
+.terminal p {
+    padding-top: 0;
+    margin-top: 0;
+    line-height: 7px;
+    color: white;
+}
+
 .topnav {
     background-color: #777;
     overflow: hidden;

@@ -219,7 +219,8 @@ export default (ctx:Context) => {
                 rendered: project.rendered ? true : false,
                 finishedchunks: JSON.parse(renderdata.finished_chunks).length,
                 totalchunks: (renderdata.animation ? (renderdata.frameend - renderdata.framestart) : 1) * renderdata.cutinto * renderdata.cutinto,
-                size: renderdata.size
+                size: renderdata.size,
+                message: project.message
             } as types.ProjectsIndexFormattedProject);
         }
 
@@ -402,6 +403,15 @@ export default (ctx:Context) => {
 
                 await dbc.updateById("renderdata", renderdata.id, {errors: JSON.stringify(newErrors)});
 
+                let totalErrors = Object.values(newErrors).flat();
+                if(totalErrors.length > constants.MAX_PROJ_ERRORS) {
+                    console.log(`Project "${project.title}" has exceeded the maximum error limit of ${constants.MAX_PROJ_ERRORS}`);
+
+                    await dbc.updateById("projects", response.chunkid.split("_")[0], {
+                        finished: true,
+                        message: `${project.message}\nProject was finished because of multiple worker errors:\n${totalErrors.map((e:any) => `\n\n====\n\n${e.errormessage}\n`)}`
+                    }); // kill it
+                }
             } else { // no error, continue
                 try {
                     // lets see if the image is actually valid, and not random information

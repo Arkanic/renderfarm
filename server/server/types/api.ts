@@ -30,7 +30,8 @@ export interface ProjectsIndexFormattedProject {
     rendered:boolean,
     finishedchunks:number,
     totalchunks:number,
-    size:number
+    size:number,
+    message:string
 }
 export interface ProjectsIndexRequest {
     unfinishedonly:boolean

@@ -37,6 +37,20 @@ export default async function home() {
         title.innerHTML = project.title;
         section.appendChild(title);
 
+        if(project.finished) {
+            let messagesBox = document.createElement("div");
+            messagesBox.classList.add("terminal");
+
+            let parts = project.message.split("\n");
+            for(let part of parts) {
+                let message = document.createElement("p");
+                message.innerHTML = part;
+                messagesBox.appendChild(message);
+            }
+
+            section.appendChild(messagesBox);
+        }
+
         if(project.rendered) {
             let resultlink = document.createElement("a");
             resultlink.href = `${apiurl()}/dat/renders/${project.id}/result`;
