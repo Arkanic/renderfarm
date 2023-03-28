@@ -85,8 +85,36 @@ Visit the renderfarm dashboard and click "upload". You should see the following 
 
 Click on the button to upload your zipped blender file (with all assets), and click next. You will now see this page:
 
-![dashboard upload configuration](./img/upload-picture.png)
+![dashboard upload configuration for an image](./img/upload-picture.png)
 
 - **Blender file to be rendered**: This is a dropdown menu that shows all of the .blend files in your zip folder. Select the blend file that is your main project.
 - **Title**: This is just to be able to clearly tell which project is which on the dashboard
-- **Animation**: This checkbox 
+- **Animation**: Tick this checkbox if you want to create an animation. The configuration page will modify itself to look like this:
+
+![dashboard upload configuration for an animation](./img/upload-animation.png)
+
+- **Frame to render** or **Animation start frame** for animations: For pictures this is the frame to render. For animations this is the frame to start rendering at, inclusive of the current number
+- **End frame of animation** for animations: The last frame to render, inclusive of the number (ie an animation set to start at 1 and end at 5 will render frames 1, 2, 3, 4, and 5)
+- **Split image into x by x chunks**: Cut each frame into this many rows horizontally and vertically. Each "chunk" is rendered individually. This is good for rendering in parallel, but if set too high this can slow the render down due to the amount of initialization required for blender (the more chunks, the more times over it has to do this) If set to 2 this will give you 4 chunks per frame, if set to 3 it will give you 9, etc
+
+*Sample of cutinto 2 (lines added for demonstration):*
+
+![a picture of a howitzer with a 2x2 grid applied over it](./img/cutinto-2.png)
+
+This will produce 4 chunks that will be rendered seperately
+
+*Sample of cutinto 3 (lines added for demonstration):*
+
+![a picture of a howitzer with a 3x3 grid applied over it](./img/cutinto-3.png)
+
+This will produce 9 chunks that will be rendered seperately
+
+Cutinto is mainly useful for distributing a complex render that is a single frame among computers. There is not much having 20 computers if your render is stuck on one machine. Another use is for out-of-memory errors. By reducing the portion of the image being rendered the ram usage can also be reduced, so if blender is consistenly crashing due to running out of memory you may want to increase the cutinto.
+
+**Once you have chosen your correct options click "Submit" to start uploading the project**
+
+![dashboard upload project finished](./img/upload-finish.png)
+
+Once the upload has completed you will get a prompt like this. When you click ok the page will reload, and you should see your new project in the list of currently rendering projects.
+
+![dashboard after project is uploaded](./img/home-page.png)
