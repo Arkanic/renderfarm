@@ -199,7 +199,7 @@ class Orchestrator {
         // if the project doesn't exist anymore, ditch it
         if((await this.ctx.dbc.db("projects").where("id", parseInt(chunkid.split("_")[0]))).length === 0) return;
         // if the project is finished (errored out), ditch it
-        if((await this.ctx.dbc.getById("projects", parseInt(chunkid.split("_")[0]))).finished == 0) return;
+        //if(((await this.ctx.dbc.getById("projects", parseInt(chunkid.split("_")[0]))).finished == 0)) return;
 
         let project = await this.getProject(chunkid.split("_")[0]);
 

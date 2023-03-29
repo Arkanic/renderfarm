@@ -71,6 +71,15 @@ export default (ctx:Context) => {
 
         let file:UploadedFile = req.files["upload-file"] as unknown as any;
         
+        if((await checkDiskSpace(__dirname)).free < file.size + 4000000000) {
+            // less than 4gb available
+            return res.status(400).json({
+                success: false,
+                message: "The server has run out of space!"
+            });
+        }
+
+
         await new Promise((resolve, reject) => {
             file.mv(path.join(constants.DATA_DIR, `${filename}`), (err) => {
                 if(err) {
