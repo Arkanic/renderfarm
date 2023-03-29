@@ -92,7 +92,7 @@ export default (ctx:Context) => {
             await zip.loadAsync(fs.readFileSync(path.join(constants.DATA_DIR, filename))); // read zip file
             zip.forEach((relativePath:string, zipEntry:JSZipFull.JSZipObject) => {
                 unzippedSizes.push(new Promise(async (resolve) => {
-                    let ab = await zip.file(relativePath)!.async("arraybuffer");
+                    let ab = await zip.file(relativePath)?.async("arraybuffer");
                     let sum = ab.byteLength;
                     resolve(sum);
                 }));
