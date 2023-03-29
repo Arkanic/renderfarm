@@ -47,7 +47,7 @@ async function framesToMp4(id:string, format:string, framerate:number) {
     console.log("ffmpeg frame converting");
     return new Promise((resolve, reject) => {
         const ffmpeg = spawn("ffmpeg", ["-framerate", `${framerate}`,
-                                        `-i`, `data/renders/${id}/raw/frame-%d.PNG`,
+                                        `-i`, `data/renders/${id}/finished/frame-%d.PNG`,
                                         `data/renders/${id}/finished/final.mp4`]);
 
         ffmpeg.stdout.on("data", data => {
