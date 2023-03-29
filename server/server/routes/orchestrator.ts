@@ -93,7 +93,7 @@ export default (ctx:Context) => {
             zip.forEach((relativePath:string, zipEntry:JSZipFull.JSZipObject) => {
                 unzippedSizes.push(new Promise(async (resolve) => {
                     let ab = await zip.file(relativePath)?.async("arraybuffer");
-                    let sum = ab.byteLength;
+                    let sum = ab.byteLength || 0;
                     resolve(sum);
                 }));
                 if(relativePath == data.blendfile) foundBlend = true;
