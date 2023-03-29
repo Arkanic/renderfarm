@@ -37,7 +37,11 @@ export interface ProjectsIndexRequest {
     unfinishedonly:boolean
 }
 export interface ProjectsIndexResponse extends Response {
-    projects:Array<ProjectsIndexFormattedProject>
+    projects:Array<ProjectsIndexFormattedProject>,
+    disk: {
+        total:number,
+        free:number
+    }
 }
 
 // delete project from renderfarm

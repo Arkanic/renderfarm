@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import fileUpload, {UploadedFile} from "express-fileupload";
 import JSZip, * as JSZipFull from "jszip";
+import checkDiskSpace from "check-disk-space";
 import im from "imagemagick";
 import path from "path";
 import fs from "fs";
@@ -224,9 +225,14 @@ export default (ctx:Context) => {
             } as types.ProjectsIndexFormattedProject);
         }
 
+        let diskSpace = await checkDiskSpace(__dirname);
         let response:types.ProjectsIndexResponse = {
             success: true,
-            projects: formattedProjects
+            projects: formattedProjects,
+            disk: {
+                total: diskSpace.size,
+                free: diskSpace.free
+            }
         }
 
         res.status(200).json(response);

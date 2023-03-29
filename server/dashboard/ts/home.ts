@@ -21,7 +21,7 @@ export default async function home() {
     for(let i = 0; i < projects.projects.length; i++) totalSize += projects.projects[i].size;
 
     let p = document.createElement("p");
-    p.innerHTML = `There are a total of ${projects.projects.length} projects, taking up ${(totalSize / 1000000000).toFixed(3)}gb of storage.`;
+    p.innerHTML = `There are a total of ${projects.projects.length} projects, taking up ${(totalSize / 1000000000).toFixed(3)}gb of storage. The disk has ${(projects.disk.free / 1000000000).toFixed(3)}gb free.`;
     projectsList.appendChild(p);
 
     // ok now lets display all projects
