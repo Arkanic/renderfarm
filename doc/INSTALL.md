@@ -8,7 +8,7 @@ The very first step should be to install system dependencies. Nodejs (only teste
 
 | Dependencies                                                           | For             | Why?                                                                                                                                                                                                                                    |
 | ---------------------------------------------------------------------- | --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| ffmpeg, zip, tar                                                       | Server & Worker | Both server and client use these commands. FFmpeg is for stitching frames into a video, zip and tar are for packaging blender and animation content.                                                                                    |
+| ffmpeg, zip, tar, imagemagick                                                       | Server & Worker | Both server and client use these commands. FFmpeg is for stitching frames into a video, zip and tar are for packaging blender and animation content.                                                                                    |
 | [npm canvas dependencies](https://www.npmjs.com/package/canvas) | Server          | Combining chunks into frames. Imagemagick was considered as it is a default on some systems, however it produced corrupted images when provided blender render portions with transparent areas due to reasons I am not able to explain. |
 
 ### Build & Start Server
