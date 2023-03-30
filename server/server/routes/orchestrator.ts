@@ -275,16 +275,20 @@ export default (ctx:Context) => {
     api.post("/api/onlineworkers", async (req, res, next) => {
         if(!valid(proto, req.body, "OnlineWorkersRequest")) return next();
 
-        let renderNodes = Object.values(ctx.orchestrator.renderNodes).map(r => {return {name: r.name, currentProjectId: r.currentlyDoing.split("_")[0]}});
+        let renderNodes = Object.values(ctx.orchestrator.renderNodes);
         let serializedNodes:Array<types.OnlineWorkersWorker> = [];
         for(let i in renderNodes) {
             let renderNode = renderNodes[i];
 
-            let project = await ctx.dbc.getById("projects", renderNode.currentProjectId);
+            let title = "";
+            if(renderNode.working) {
+                let project = await ctx.dbc.getById("projects", renderNode.currentlyDoing.split("_")[0]);
+                title = project.title;
+            } else title = "Nothing";
 
             serializedNodes.push({
                 name: renderNode.name,
-                currentlyrendering: project.title
+                currentlyrendering: title
             });
         }
 
