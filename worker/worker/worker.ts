@@ -197,7 +197,7 @@ console.log(`I am ${name}`);
     /**
      * Prune old project files
      */
-    setInterval(async () => {
+    async function pruneProjects() {
         console.log("Pruning old projects...");
         let res = await axios.post(`${surl}/api/projectsindex`, {unfinishedonly: false});
         let data:types.ProjectsIndexResponse = res.data;
@@ -223,7 +223,10 @@ console.log(`I am ${name}`);
                 fs.rmSync(path.join(TEMP_DIR, `${cachedProject}`), {recursive: true, force: true});
             }
         }
-    }, PRUNE_PROJECTS_INTERVAL);
+    }
+
+    setInterval(async () => {await pruneProjects()}, PRUNE_PROJECTS_INTERVAL);
+    await pruneProjects();
 
     setInterval(async () => {
         await axios.post(`${surl}/api/heartbeat`, {id: id}); // kindly let them know we are alive
