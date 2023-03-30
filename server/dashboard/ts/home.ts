@@ -37,7 +37,7 @@ export default async function home() {
         title.innerHTML = project.title;
         section.appendChild(title);
 
-        if(project.finished) {
+        if(project.finished && project.message) {
             let messagesBox = document.createElement("div");
             messagesBox.classList.add("terminal");
 
