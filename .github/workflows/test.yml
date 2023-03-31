@@ -1,0 +1,32 @@
+name: Test Build
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v2.5.2
+        with:
+          node-version: 16.x
+      
+      - name: Install APT Dependencies
+        run: ./tools/packages-gitpod-ubuntu.sh
+      
+      - name: Build Server
+        run: |
+          cd server
+          npm i
+          npm run build
+      
+      - name: Build Worker
+        run: |
+          cd worker
+          npm i
+          npm run build
