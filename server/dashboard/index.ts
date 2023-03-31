@@ -6,6 +6,4 @@ console.log("dashboard");
 window.addEventListener("load", async () => {
     console.log("loaded");
     startNavListener();
-
-    await home();
 });

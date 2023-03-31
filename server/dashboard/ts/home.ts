@@ -1,10 +1,23 @@
 import axios from "axios";
 import {apiurl, networkOptions} from "./networking";
+import {autoUpdate} from "./util/autoupdate";
 import * as types from "./types/api";
 
+const UPDATE_RATE = 30; // ten seconds
+
 let projectsList = document.getElementById("projects-list")!;
+let projectsUpdateText = document.getElementById("projects-update-text")! as HTMLHeadingElement;
+let projectsUpdateButton = document.getElementById("projects-update-button")! as HTMLInputElement;
 
 export default async function home() {
+    await homeTask();
+
+    autoUpdate(projectsUpdateText, projectsUpdateButton, UPDATE_RATE, async () => {
+        await homeTask();
+    });
+}
+
+async function homeTask() {
     projectsList.innerHTML = "";
 
     let projects:types.ProjectsIndexResponse = (await axios.post(`${apiurl()}/api/projectsindex`, {unfinishedonly: false}, networkOptions())).data;
@@ -80,7 +93,7 @@ export default async function home() {
 
             await axios.post(`${apiurl()}/api/deleteproject`, {projectid: project.id}, networkOptions());
 
-            home();
+            await homeTask();
         });
         section.appendChild(deleteButton);
 

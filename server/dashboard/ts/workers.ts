@@ -1,11 +1,23 @@
 import axios from "axios";
+import {autoUpdate} from "./util/autoupdate";
 import {apiurl, networkOptions} from "./networking";
 import * as types from "./types/api";
 
+const UPDATE_RATE = 10;
+
 let workersList = document.getElementById("workers-list")!;
+let workersUpdateText = document.getElementById("workers-update-text")! as HTMLElement;
+let workersUpdateButton = document.getElementById("workers-update-button")! as HTMLInputElement;
 
 export default async function workers() {
-    workersList.innerHTML = "";
+    await workersTask();
+
+    autoUpdate(workersUpdateText, workersUpdateButton, UPDATE_RATE, async () => {
+        await workersTask();
+    });
+}
+
+async function workersTask() {
 
     let workers:types.OnlineWorkersResponse = (await axios.post(`${apiurl()}/api/onlineworkers`, {}, networkOptions())).data;
     if(!workers.success) {
@@ -15,6 +27,9 @@ export default async function workers() {
 
         return;
     }
+
+
+    workersList.innerHTML = "";
 
     for(let i = 0; i < workers.workers.length; i++) {
         let worker = workers.workers[i];

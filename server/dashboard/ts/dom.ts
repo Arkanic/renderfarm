@@ -7,29 +7,16 @@ import settings from "./settings";
  * Start up the navbar handler so that clicking the buttons changes what "page" you are on
  */
 export async function startNavListener() {
+    await home();
+    await workers();
+    await upload();
+    await settings();
+
     let boxes = ["home", "workers", "upload", "settings"];
     for(let box of boxes) {
         let button = document.getElementById(`nav-${box}`)!;
         button.addEventListener("click", async e => {
             if(button.classList.contains("active")) return; // if we are already on this page, ignore
-
-            switch(box) {
-                case "home":
-                    await home();
-                    break;
-                case "workers":
-                    await workers();
-                    break;
-                case "upload":
-                    await upload();
-                    break;
-                case "settings":
-                    await settings();
-                    break;
-                default:
-                    await (async () => {})();
-                    break;
-            }
 
             // hide all the other boxes
             for(let otherBox of boxes.filter(b => b != box)) {
