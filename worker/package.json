@@ -10,7 +10,7 @@
     "wbuild": "tsc",
     "start": "node ./worker-build/worker.js",
     "quick": "npm run build && npm run start",
-    "package": "zip -r worker.zip . ../server/server/types"
+    "package": "zip -r ../worker.zip . ../server/server/types"
   },
   "repository": {
     "type": "git",
