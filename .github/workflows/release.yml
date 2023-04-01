@@ -1,0 +1,55 @@
+name: Build Release Artifacts
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  deploy:
+    permissions:
+      contents: write
+    
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Setup node.js
+        uses: actions/setup-node@v2.5.2
+        with:
+          node-version: 16.x
+      
+      - name: Build & package server
+        run: |
+          cd server
+          npm i
+          npm run build
+          npm prune --production
+          npm run package
+      
+      - name: Build & package worker
+        run: |
+          cd worker
+          npm i
+          npm run build
+          npm prune --production
+          npm run package
+      
+      - name: Name artifacts
+        run: |
+          mv server.zip server-ubuntu-amd64.zip
+          mv worker.zip worker-ubuntu-amd64.zip
+      
+      - name: Upload server artifacts
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: server-ubuntu-amd64.zip
+          tag: ${{ github.ref }}
+      - name: Upload client artifacts
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: worker-ubuntu-amd64.zip
+          tag: ${{ github.ref }}
