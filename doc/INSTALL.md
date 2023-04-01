@@ -13,6 +13,13 @@ The very first step should be to install system dependencies. Nodejs (only teste
 
 ### Build & Start Server
 
+#### Option 1: Prepackaged release of your architecture
+
+Go to the releases page on the [Github Repo](https://github.com/Arkanic/renderfarm), find the releases page, and download the server THAT MATCHES YOUR ARCHITECTURE. If you can't find one that matches, follow option 2.
+
+Unzip the server file with `unzip <zip file>.zip` and follow the steps as per normal.
+
+#### Option 2: Build manually (all other systems)
 
 `git clone https://github.com/Arkanic/renderfarm && cd renderfarm`
 
@@ -23,6 +30,8 @@ npm run build
 ```
 
 if you get some weird node-gyp error, revisit the [canvas npm page](https://www.npmjs.com/package/canvas) and make sure you have installed all of the required dependencies.
+
+#### Starting
 
 Once all of the files have installed run the start command to start the server. The server will run for a couple of seconds, and then exit.
 
@@ -56,7 +65,9 @@ If you visit `http://<server's local ip address>:8080/` in your browser (e.g. ht
 
 ### Build & start a single worker
 
-On your worker machine clone the respoitory, the same way as above
+On your worker machine clone the respoitory, the same way as above. If there is a worker release that supports your architecture, use that, and unzip it as displayed in the server section.
+
+Alternatively, to build:
 
 `git clone https://github.com/Arkanic/renderfarm && cd renderfarm`
 
