@@ -46,6 +46,17 @@ async function workersTask() {
         info.innerHTML = `Currently working on "${worker.currentlyrendering}"`;
         section.appendChild(info);
 
+        let logBox = document.createElement("div");
+        logBox.classList.add("terminal");
+
+        let parts = worker.logs.split("\n");
+        for(let part of parts) {
+            let log = document.createElement("p");
+            log.innerHTML = part;
+            logBox.appendChild(log);
+        }
+        section.appendChild(logBox);
+
         workersList.appendChild(section);
     }
 }

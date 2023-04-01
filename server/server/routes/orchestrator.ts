@@ -288,7 +288,8 @@ export default (ctx:Context) => {
 
             serializedNodes.push({
                 name: renderNode.name,
-                currentlyrendering: title
+                currentlyrendering: title,
+                logs: renderNode.getLog()
             });
         }
 
@@ -477,6 +478,19 @@ export default (ctx:Context) => {
         orchestrator.finishJob(response.id, response.chunkid);
 
         res.status(200).json({
+            success: true
+        });
+    });
+
+    api.post("/api/updatelogs", async (req, res, next) => {
+        if(!valid(proto, req.body, "UpdateLogsRequest")) return next();
+        
+        let data:types.UpdateLogsRequest = req.body;
+        if(!orchestrator.doesNodeExist(data.id)) return next();
+
+        orchestrator.renderNodes[data.id].appendLog(data.newlogs);
+
+        res.status(200).send({
             success: true
         });
     });

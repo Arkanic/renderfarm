@@ -53,7 +53,8 @@ export interface DeleteProjectResponse extends Response {}
 // see what workers are online
 export interface OnlineWorkersWorker {
     name:string,
-    currentlyrendering:string // name of what it is currently rendering
+    currentlyrendering:string, // name of what it is currently rendering
+    logs:string // logs of this worker
 }
 export interface OnlineWorkersRequest {}
 export interface OnlineWorkersResponse extends Response {
@@ -115,6 +116,12 @@ export interface FinishjobRequest extends Request {
     fpsbase:number
 }
 export interface FinishjobResponse extends Response {}
+
+// update server with current logs
+export interface UpdateLogsRequest extends Request {
+    newlogs:string
+}
+export interface UpdateLogsResponse extends Response {}
 
 // send heartbeat
 export interface HeartbeatRequest extends Request {}

@@ -6,6 +6,7 @@ class RenderNode {
     working:boolean;
     currentlyDoing:string;
     lastHeartbeat:number;
+    logs:string;
 
     constructor(id:string, name:string) {
         this.id = id;
@@ -13,6 +14,7 @@ class RenderNode {
         this.working = false;
         this.currentlyDoing = "nothing";
         this.lastHeartbeat = Date.now();
+        this.logs = "";
     }
 
     startJob(job:string) {
@@ -45,6 +47,20 @@ class RenderNode {
      */
     ping() {
         this.lastHeartbeat = Date.now();
+    }
+
+    /**
+     * Add new logs to this rendernode. Automatically prunes old messages once WORKER_LOG_NEWLINE_LENGTH is reached.
+     */
+    appendLog(log:string) {
+        this.logs += log;
+        this.logs = this.logs.split("\n") // keep log length at WORKER_LOG_NEWLINE_LENGTH newlines tops
+            .slice(Math.max(this.logs.split("\n").length - constants.WORKER_LOG_NEWLINE_LENGTH, 0))
+            .join("\n");
+    }
+
+    getLog():string {
+        return this.logs;
     }
 }
 
