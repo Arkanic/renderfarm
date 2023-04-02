@@ -307,11 +307,11 @@ log(`I am ${name}`);
                 "-b", path.join(TEMP_DIR, `${job.dataid}`, job.blendfile), // the blender file is here
                 "-P", "worker/renderer.py", // the script is here
                 "--", // options for the script
-                TEMP_DIR, // where to save out.whatever
-                job.frame.toString(), // frame
-                job.cutinto.toString(), // what to split into?
-                job.row.toString(), // what row to render
-                job.column.toString() // what column to render
+                "-o", TEMP_DIR, // where to save out.whatever
+                "-f", job.frame.toString(), // frame
+                "-ci", job.cutinto.toString(), // what to split into?
+                "-r", job.row.toString(), // what row to render
+                "-cl", job.column.toString() // what column to render
             ]);
 
             blender.stdout.on("data", data => {
