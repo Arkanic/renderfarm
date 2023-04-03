@@ -84,7 +84,6 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
     //for(let frame = renderdata.framestart; renderdata.animation ? frame < renderdata.frameend : !imageDone; frame++) {
     let frame = renderdata.framestart;
     do {
-        console.log(`Starting frame ${frame}`);
         let canvas = createCanvas(sampleImage.width, sampleImage.height);
         let c = canvas.getContext("2d");
         for(let row = 0; row < renderdata.cutinto; row++) {
@@ -95,19 +94,22 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
         }
 
         fs.writeFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", `frame-${frame}.${format}`), canvas.toBuffer());
-        console.log(`Did frame ${frame}`);
+        console.log(`Combined frame ${frame}`);
         frame++;
     } while((renderdata.animation == 1) ? frame < renderdata.frameend : false);
 
     if(renderdata.animation) { // if it is an animation
         // we need to combine the frames into a video now
+        console.log("Combining frames with ffmpeg");
         let [fps, fpsbase] = fs.readFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "renderdata")).toString().split("\n").map(s => parseInt(s));
         await framesToMp4(`${project.id}`, format, fps * fpsbase); // ok lets stitch
     } else {
         // rename image and dump it in
+        console.log("Renaming image");
         fs.renameSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", `frame-${renderdata.framestart}.${format}`), path.join(finishedPath, `final.${format}`));
     }
 
+    console.log("Zipping raw frames");
     // zip raw images, also set rendered to true
     await zipDir(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw"), path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", "raw.zip"));
 
