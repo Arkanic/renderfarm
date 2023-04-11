@@ -304,6 +304,11 @@ export default (ctx:Context) => {
         if(!valid(proto, req.body, "ClearDBRequest")) return next();
         let data:types.ClearDBRequest = req.body;
 
+        if(!ctx.verifyPassword(data.password)) return res.status(401).json({
+            success: false,
+            message: "Password is incorrect."
+        });
+
         fs.renameSync(path.join(constants.DATA_DIR, "blender.tar.xz"), "blender.tar.xz");
         fs.rmSync(constants.DATA_DIR, {force: true, recursive: true}); // HAHAHHA
         fs.mkdirSync(constants.DATA_DIR);
