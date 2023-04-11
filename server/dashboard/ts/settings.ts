@@ -32,12 +32,19 @@ export default async function settings() {
         let listOfFunnyWords = ["DIE DIE DIE", "KILL", "DEATH", "BURN IT ALL", "please work"];
         let word = listOfFunnyWords[Math.floor(Math.random() * listOfFunnyWords.length)];
 
+        let password = prompt("Please provide the password");
+
         confirmation = prompt(`Are you really really sure? Type '${word}' to continue`);
         if(confirmation === null || confirmation !== word) return;
 
-        await axios.post(`${apiurl()}/api/cleardb`, {}, networkOptions());
+        let res = await axios.post(`${apiurl()}/api/cleardb`, {password}, networkOptions());
 
-        alert("Done!\nHave a nice day")
+        if(res.status == 401) {
+            alert("Password was incorrect!");
+        } else {
+            alert("Done!\nHave a nice day");
+            window.location.reload();
+        }
     });
 
     // now the user wants to upload a blender file
