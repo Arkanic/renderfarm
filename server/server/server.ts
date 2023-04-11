@@ -1,7 +1,8 @@
 import express from "express";
 import fs from "fs";
 import crypto from "crypto"
-import {nanoid} from "nanoid";
+import bcrypt from "bcrypt";
+import {nanoid, customAlphabet} from "nanoid";
 
 import database, {DbConnection} from "./db";
 import constants from "./constants";
@@ -17,7 +18,8 @@ export interface Context {
     dbc:DbConnection,
     orchestrator:Orchestrator,
     serverhash:string,
-    blenderhash:string
+    blenderhash:string,
+    verifyPassword:(pass:string) => boolean
 }
 
 let ctx:Context = null as any as Context;
@@ -58,13 +60,33 @@ database("production").then(async db => {
     }
     console.log(serverHash);
 
+
+    let passwordLocation = `./${constants.DATA_DIR}/shadow`;
+    let password = "";
+    if(!fs.existsSync(passwordLocation)) {
+        console.log("No password has been set!\nAutomatically generating password...");
+        let rawPassword = customAlphabet("abcdefghijklmnnopqrstuvwxyz0123456789", Math.floor(Math.random() * 4) + 8)();
+        console.log(`The password for the dashboard is\n${rawPassword}`);
+
+        let salt = bcrypt.genSaltSync(constants.BCRYPT_SALT_ROUNDS);
+        password = bcrypt.hashSync(rawPassword, salt);
+
+        fs.writeFileSync(passwordLocation, password);
+    } else {
+        password = fs.readFileSync(passwordLocation).toString().split("\n")[0];
+    }
+
+
     ctx = {
         dashboard,
         api,
         dbc: dbConnection,
         orchestrator:null as unknown as Orchestrator, //need to initially set orchestrator to null to prevent recursive definition,
         serverhash: serverHash,
-        blenderhash: "placeholder"
+        blenderhash: "placeholder",
+        verifyPassword: (pass:string) => {
+            return bcrypt.compareSync(pass, password);
+        }
     }
 
     updateBlenderHash();

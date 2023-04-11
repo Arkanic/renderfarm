@@ -139,3 +139,7 @@ If a new blender version comes out you can use this option to upload a new blend
 ##### Purge the database
 
 If thinks get really broken, you can delete the entire database and crash the renderfarm. **NOTE:** this will delete all of the renders, all projects, and all progress on unfinished scenes! use at your own risk!!!
+
+##### Custom password
+
+The dashboard password can be modified by running `server/tools/genpassword.js` to generate a new password hash. Stop the server, replace the hash in `server/data/shadow` with your own, and start the server again. The new password should now be your custom one.

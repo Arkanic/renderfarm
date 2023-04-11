@@ -66,7 +66,9 @@ export interface UploadBlenderRequest {}
 export interface UploadBlenderResponse extends Response {}
 
 // Purge database with flames and suffering, etc etc
-export interface ClearDBRequest {}
+export interface ClearDBRequest {
+    password:string
+}
 export interface ClearDBResponse extends Response {}
 
 // request to join renderfarm

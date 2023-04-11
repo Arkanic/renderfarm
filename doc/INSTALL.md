@@ -42,9 +42,13 @@ npm start
 The program will exit with the following message:
 
 ```
+Automatically generating password...
+ua2dhh6s
 blender.tar.xz not found in /data!!!
 download it from blender.org, later versions can be installed from client.
 ```
+
+First off, write this password down somewhere. It is required to perform any really destructive actions from the dashboard, to prevent misuse. 
 
 You need to go to the [official blender website](https://blender.org) and download the .tar.xz blender download that fits both your system and cpu architecture of your workers. Presuming the workers all are on an x64 system, the package will look something like `blender-3.4.1-linux-x64.tar.xz`. Rename this file to `blender.tar.xz` and put it inside of the `data` folder that has now appeared in the `server` directory. Your file structure should now look something like this:
 
