@@ -6,6 +6,7 @@ import * as types from "./types/api";
 const UPDATE_RATE = 30; // ten seconds
 
 let projectsList = document.getElementById("projects-list")!;
+let projectsSize = document.getElementById("projects-size")!;
 let projectsUpdateText = document.getElementById("projects-update-text")! as HTMLHeadingElement;
 let projectsUpdateButton = document.getElementById("projects-update-button")! as HTMLInputElement;
 
@@ -23,9 +24,7 @@ async function homeTask() {
     let projects:types.ProjectsIndexResponse = (await axios.post(`${apiurl()}/api/projectsindex`, {unfinishedonly: false}, networkOptions())).data;
     // it didn't work, show message
     if(!projects.success) {
-        let p = document.createElement("p");
-        p.classList.add("error");
-        p.innerHTML = projects.message!;
+        projectsSize.innerText = projects.message!;
 
         return;
     }
@@ -33,18 +32,24 @@ async function homeTask() {
     let totalSize = 0;
     for(let i = 0; i < projects.projects.length; i++) totalSize += projects.projects[i].size;
 
-    let p = document.createElement("p");
-    p.innerHTML = `There are a total of ${projects.projects.length} projects, taking up ${(totalSize / 1000000000).toFixed(3)}gb of storage. The disk has ${(projects.disk.free / 1000000000).toFixed(3)}gb free.`;
-    projectsList.appendChild(p);
+    projectsSize.innerText = `There are a total of ${projects.projects.length} projects, taking up ${(totalSize / 1000000000).toFixed(3)}gb of storage. The disk has ${(projects.disk.free / 1000000000).toFixed(3)}gb free.`;
+
 
     // ok now lets display all projects
     projects.projects = projects.projects.reverse(); // newest first
     for(let i = 0; i < projects.projects.length; i++) {
         let project = projects.projects[i];
 
+        let box = document.createElement("div");
+        box.classList.add("list-group-item", "py-5", "lh-sm");
+
         let section = document.createElement("div");
-        section.classList.add("section");
-        if(project.finished) section.classList.add("finished"); // if it is finished dull it out
+        section.classList.add("d-flex", "w-100", "align-items-left", "justify-content-between", "flex-column");
+        if(project.finished) {
+            let p = document.createElement("p");
+            p.innerHTML = "FINISHED";
+            section.appendChild(p);
+        }
 
         let title = document.createElement("h4");
         title.innerHTML = project.title;
@@ -103,6 +108,7 @@ async function homeTask() {
         info.innerHTML = `Created: ${dateCreated.toLocaleDateString()} ${dateCreated.toLocaleTimeString()} %${((project.finishedchunks / project.totalchunks) * 100).toFixed(2)} done`;
         section.appendChild(info);
 
-        projectsList.appendChild(section);
+        box.appendChild(section);
+        projectsList.appendChild(box);
     }
 }

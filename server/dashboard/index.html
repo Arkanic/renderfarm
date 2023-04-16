@@ -9,17 +9,32 @@
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     </head>
     <body>
-        <div class="topnav">
-            <a class="active" id="nav-home">Home</a>
-            <a id="nav-workers">Workers</a>
-            <a id="nav-upload">Upload</a>
-            <a id="nav-settings">Settings</a>
-        </div>
-        <div class="content" id="content">
-            <div class="subcontent" id="box-home">
-                <div id="projects-list"></div>
-                <h6 id="projects-update-text">~</h6>
-                <input type="button" id="projects-update-button" value="Update"/>
+        <header class="d-flex justify-content-center py-3">
+            <ul class="nav nav-pills">
+                <li class="nav-item">
+                    <a href="#" class="nav-link active" id="nav-home">Home</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="nav-workers">Workers</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="nav-upload">Upload</a>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link" id="nav-settings">Settings</a>
+                </li>
+            </ul>
+        </header>
+        <div id="content">
+            <div id="box-home">
+                <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary" style="width: 100%">
+                    <div class="d-flex align-items-center flex-shrink-0 p-3 border-bottom">
+                        <span id="projects-size" class="fs-5 fw-semibold"></span>
+                    </div>
+                    <div id="projects-list" class="list-group list-group-flush border-bottom scrollarea"></div>
+                </div>
+                <p id="projects-update-text">~</p>
+                <button id="projects-update-button" class="btn btn-secondary d-inline-flex align-items-center" type="button">Update</button>
             </div>
             <div class="subcontent hidden" id="box-workers">
                 <div id="workers-list"></div>
@@ -93,6 +108,5 @@
                 </div>
             </div>
         </div>
-        <script src="./dashboard.js"></script>
     </body>
 </html>
