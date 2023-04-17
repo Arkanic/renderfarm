@@ -1,7 +1,12 @@
 import axios from "axios";
+import TimeAgo from "javascript-time-ago";
+import en from "javascript-time-ago/locale/en";
 import {apiurl, networkOptions} from "./networking";
 import {autoUpdate} from "./util/autoupdate";
 import * as types from "./types/api";
+
+TimeAgo.addDefaultLocale(en);
+const timeAgo = new TimeAgo("en-GB");
 
 const UPDATE_RATE = 30; // ten seconds
 
@@ -19,8 +24,6 @@ export default async function home() {
 }
 
 async function homeTask() {
-    projectsList.innerHTML = "";
-
     let projects:types.ProjectsIndexResponse = (await axios.post(`${apiurl()}/api/projectsindex`, {unfinishedonly: false}, networkOptions())).data;
     // it didn't work, show message
     if(!projects.success) {
@@ -28,6 +31,8 @@ async function homeTask() {
 
         return;
     }
+
+    projectsList.innerHTML = ""; // remove old content
 
     let totalSize = 0;
     for(let i = 0; i < projects.projects.length; i++) totalSize += projects.projects[i].size;
@@ -41,7 +46,7 @@ async function homeTask() {
         let project = projects.projects[i];
 
         let box = document.createElement("div");
-        box.classList.add("list-group-item", "py-5", "lh-sm");
+        box.classList.add("w-100", "list-group-item", "py-5", "lh-sm", "border");
 
         let section = document.createElement("div");
         section.classList.add("d-flex", "w-100", "align-items-left", "justify-content-between", "flex-column");
@@ -90,7 +95,29 @@ async function homeTask() {
         size.innerHTML = `Size: ${(project.size / 1000000).toFixed(2)}mb`;
         section.appendChild(size);
 
+        let dateCreated = new Date(project.created);
+        let info = document.createElement("p");
+        info.classList.add("info");
+        info.innerHTML = `Created ${timeAgo.format(dateCreated)}`;
+        section.appendChild(info);
+
+        let progress = document.createElement("div");
+        progress.classList.add("progress");
+        let bar = document.createElement("progress");
+        bar.role = "progressbar";
+        bar.classList.add("progress-bar");
+        bar.ariaValueMin = "0";
+        bar.ariaValueMax = "100";
+        bar.ariaValueNow = Math.round(((project.finishedchunks / project.totalchunks) * 100)).toString();
+        bar.style.width = Math.round((project.finishedchunks / project.totalchunks) * 100).toString();
+        bar.innerText = ((project.finishedchunks / project.totalchunks) * 100).toFixed(2) + "%";
+        progress.appendChild(bar);
+        section.appendChild(progress);
+
+        section.appendChild(document.createElement("p"));
+
         let deleteButton = document.createElement("button");
+        deleteButton.classList.add("btn", "btn-outline-danger", "btn-block", "w-25");
         deleteButton.innerHTML = "Delete";
         deleteButton.addEventListener("click", async () => {
             let confirmation = prompt("type 'yes' to confirm deletion")?.toLowerCase();
@@ -101,12 +128,6 @@ async function homeTask() {
             await homeTask();
         });
         section.appendChild(deleteButton);
-
-        let dateCreated = new Date(project.created);
-        let info = document.createElement("p");
-        info.classList.add("info");
-        info.innerHTML = `Created: ${dateCreated.toLocaleDateString()} ${dateCreated.toLocaleTimeString()} %${((project.finishedchunks / project.totalchunks) * 100).toFixed(2)} done`;
-        section.appendChild(info);
 
         box.appendChild(section);
         projectsList.appendChild(box);
