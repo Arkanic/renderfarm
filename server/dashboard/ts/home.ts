@@ -103,18 +103,6 @@ async function homeTask() {
         info.innerHTML = `Created ${timeAgo.format(dateCreated)}, ${((project.finishedchunks / project.totalchunks) * 100).toFixed(2)}% done`;
         section.appendChild(info);
 
-        let progress = document.createElement("div");
-        progress.classList.add("progress");
-        let bar = document.createElement("progress");
-        bar.role = "progressbar";
-        bar.classList.add("progress-bar");
-        bar.ariaValueMin = "0";
-        bar.ariaValueMax = "100";
-        bar.ariaValueNow = Math.round(((project.finishedchunks / project.totalchunks) * 100)).toString();
-        bar.style.width = Math.round((project.finishedchunks / project.totalchunks) * 100).toString();
-        progress.appendChild(bar);
-        section.appendChild(progress);
-
         section.appendChild(document.createElement("p"));
 
         let deleteButton = document.createElement("button");
