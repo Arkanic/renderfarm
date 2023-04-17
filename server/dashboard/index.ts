@@ -10,6 +10,8 @@ import {startNavListener} from "./ts/dom";
 
 console.log("dashboard");
 window.addEventListener("load", async () => {
+    document.getElementById("cover")!.classList.add("hidden"); // was covered to prevent css-less html from showing
+
     await home();
     await upload();
     await workers();

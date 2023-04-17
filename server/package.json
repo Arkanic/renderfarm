@@ -41,7 +41,6 @@
     "ts-json-schema-generator": "^1.2.0"
   },
   "devDependencies": {
-    "@popperjs/core": "^2.11.7",
     "@types/bcrypt": "^5.0.0",
     "@types/bootstrap": "^5.2.6",
     "@types/cors": "^2.8.13",

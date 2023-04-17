@@ -8,6 +8,7 @@
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     </head>
     <body>
+        <div id="cover" style="position: fixed; height: 100%; width: 100%; top: 0; left: 0; background: white; z-index: 9999;"></div>
         <p></p>
         <div class="d-flex justify-content-center">
             <h1>Renderfarm</h1>
@@ -28,7 +29,7 @@
                 </li>
             </ul>
         </header>
-        <div id="content">
+        <div id="content" class="padsml">
             <div id="box-home">
                 <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary" style="width: 100%">
                     <div class="d-flex align-items-center flex-shrink-0 p-3 border-bottom">
@@ -51,7 +52,7 @@
                 <p id="workers-update-text">~</p>
                 <input class="btn btn-secondary" type="button" id="workers-update-button" value="Update"/>
             </div>
-            <div class="ml-1 hidden" id="box-upload">
+            <div class="hidden" id="box-upload">
                 <form ref="uploadform" id="uploadform" method="post" action="#" enctype="multipart/form-data">
                     <div id="upload-upload-box">
                         <label for="upload-file">File Upload (.zip of blend file and assets): </label>
