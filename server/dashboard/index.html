@@ -4,7 +4,6 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>Renderfarm Dashboard</title>
-        <!--<link type="text/css" rel="stylesheet" href="./global.css"/>-->
         <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
     </head>
@@ -41,7 +40,7 @@
                 <p id="projects-update-text">~</p>
                 <button id="projects-update-button" class="btn btn-secondary d-inline-flex align-items-center" type="button">Update</button>
             </div>
-            <div class="subcontent hidden" id="box-workers">
+            <div class="hidden" id="box-workers">
                 <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary" style="width: 100%">
                     <div class="d-flex align-items-center flex-shrink-0 p-3 border-bottom">
                         <span id="workers-count" class="fs-6"></span>
@@ -52,7 +51,7 @@
                 <p id="workers-update-text">~</p>
                 <input class="btn btn-secondary" type="button" id="workers-update-button" value="Update"/>
             </div>
-            <div class="subcontent hidden" id="box-upload">
+            <div class="ml-1 hidden" id="box-upload">
                 <form ref="uploadform" id="uploadform" method="post" action="#" enctype="multipart/form-data">
                     <div id="upload-upload-box">
                         <label for="upload-file">File Upload (.zip of blend file and assets): </label>
@@ -67,26 +66,19 @@
                             <div class="spinner-border spinner-border-lg" role="status" style="width: 3rem; height: 3rem;"></div>
                         </div>
                     </div>
-                    <div id="upload-config-box" class="hidden">
+                    <div id="upload-config-box" class="hidden w-50">
                         <label for="upload-blendfile">Blender file to be rendered: </label>
                         <select class="form-select" name="upload-blendfile" id="upload-blendfile"></select>
-                        <br>
                         <label for="upload-title">Title: </label>
                         <input type="text" name="upload-title" id="upload-title" class="form-control"></input>
-                        <br>
                         <label for="upload-animation" class="form-check-label">Animation: </label>
                         <input type="checkbox" name="upload-animation" id="upload-animation" class="form-check-input"/>
-                        <p></p>
-                        <br>
                         <label for="upload-framestart" id="upload-framestart-label">Frame to render: </label>
                         <input type="number" name="upload-framestart" id="upload-framestart" value="1" class="form-control"/>
-                        <br>
                         <label for="upload-frameend" id="upload-frameend-label" class="hidden">End frame of animation: </label>
                         <input type="number" name="upload-frameend" id="upload-frameend" class="hidden form-control"/>
-                        <br>
                         <label for="upload-cutinto">Split image into x by x chunks: </label>
                         <input type="number" name="upload-cutinto" id="upload-cutinto" value="2" max="8" class="form-control"/>
-                        <br>
                         <p>2 Is the recommended split chunks level (this will turn every image into 4 quarters to be rendered)<br>Having this set too high can actually increase the time taken to render because of all the initialization needed to be done before the start of the render.</p>
                         <input class="btn btn-primary" type="button" id="upload-config-submit" value="Submit"/>
                     </div>
@@ -97,7 +89,7 @@
                     <progress id="upload-progress" value="0" max="100"></progress>
                 </div>
             </div>
-            <div class="subcontent hidden" id="box-settings">
+            <div class="hidden" id="box-settings">
                 <div id="settings-main-box">
                     <p><a class="btn btn-warning" href="#" id="settings-blenderupload-start">Upload new blender.tar.xz</a></p>
                     <p><a class="btn btn-danger" href="#" id="settings-cleardb-start">Purge all database (bad)</a></p>
