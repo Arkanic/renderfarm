@@ -56,12 +56,10 @@
                 <form ref="uploadform" id="uploadform" method="post" action="#" enctype="multipart/form-data">
                     <div id="upload-upload-box">
                         <label for="upload-file">File Upload (.zip of blend file and assets): </label>
-                        <input type="file" name="upload-file" id="upload-file" accept="application/zip"/>
+                        <input type="file" name="upload-file" id="upload-file" accept="application/zip" class="form-control"/>
                         <br>
-                        <input type="button" id="upload-upload-submit" value="Next"/>
-                        <br>
-                        <p>Make sure to have the blender file set to relative paths (File > External Data > Make All Paths Relative).</p>
-                        <p>All fluid cache, external images, etc should be included in the zip file as well.</p>
+                        <p>Make sure to have the blender file set to relative paths (File > External Data > Make All Paths Relative).<br>All fluid cache, external images, etc should be included in the zip file as well.</p>
+                        <input type="button" id="upload-upload-submit" class="btn btn-primary" value="Next"/>
                     </div>
                     <div id="upload-loading-box" class="hidden">
                         <p>Loading...</p>
@@ -70,26 +68,26 @@
                     </div>
                     <div id="upload-config-box" class="hidden">
                         <label for="upload-blendfile">Blender file to be rendered: </label>
-                        <select name="upload-blendfile" id="upload-blendfile"></select>
+                        <select class="form-select" name="upload-blendfile" id="upload-blendfile"></select>
                         <br>
                         <label for="upload-title">Title: </label>
-                        <input type="text" name="upload-title" id="upload-title"></input>
+                        <input type="text" name="upload-title" id="upload-title" class="form-control"></input>
                         <br>
-                        <label for="upload-animation">Animation: </label>
-                        <input type="checkbox" name="upload-animation" id="upload-animation"/>
+                        <label for="upload-animation" class="form-check-label">Animation: </label>
+                        <input type="checkbox" name="upload-animation" id="upload-animation" class="form-check-input"/>
+                        <p></p>
                         <br>
                         <label for="upload-framestart" id="upload-framestart-label">Frame to render: </label>
-                        <input type="number" name="upload-framestart" id="upload-framestart" value="1"/>
+                        <input type="number" name="upload-framestart" id="upload-framestart" value="1" class="form-control"/>
                         <br>
                         <label for="upload-frameend" id="upload-frameend-label" class="hidden">End frame of animation: </label>
-                        <input type="number" name="upload-frameend" id="upload-frameend" class="hidden"/>
+                        <input type="number" name="upload-frameend" id="upload-frameend" class="hidden form-control"/>
                         <br>
                         <label for="upload-cutinto">Split image into x by x chunks: </label>
-                        <input type="number" name="upload-cutinto" id="upload-cutinto" value="2" max="8"/>
+                        <input type="number" name="upload-cutinto" id="upload-cutinto" value="2" max="8" class="form-control"/>
                         <br>
-                        <p>2 Is the recommended split chunks level (this will turn every image into 4 quarters to be rendered)</p>
-                        <p>Having this set too high can actually increase the time taken to render because of all the initialization needed to be done before the start of the render.</p>
-                        <input type="button" id="upload-config-submit" value="Submit"/>
+                        <p>2 Is the recommended split chunks level (this will turn every image into 4 quarters to be rendered)<br>Having this set too high can actually increase the time taken to render because of all the initialization needed to be done before the start of the render.</p>
+                        <input class="btn btn-primary" type="button" id="upload-config-submit" value="Submit"/>
                     </div>
                 </form>
                 <div id="upload-uploading-box" class="hidden">
