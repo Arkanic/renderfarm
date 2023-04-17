@@ -42,7 +42,13 @@
                 <button id="projects-update-button" class="btn btn-secondary d-inline-flex align-items-center" type="button">Update</button>
             </div>
             <div class="subcontent hidden" id="box-workers">
-                <div id="workers-list"></div>
+                <div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-body-tertiary" style="width: 100%">
+                    <div class="d-flex align-items-center flex-shrink-0 p-3 border-bottom">
+                        <span id="workers-count" class="fs-6"></span>
+                    </div>
+                    <div id="workers-list" class="list-group list-group-flush border-bottom scrollarea"></div>
+                </div>
+                <p></p>
                 <p id="workers-update-text">~</p>
                 <input type="button" id="workers-update-button" value="Update"/>
             </div>

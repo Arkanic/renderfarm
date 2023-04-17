@@ -28,21 +28,22 @@ async function workersTask() {
         return;
     }
 
-
     workersList.innerHTML = "";
 
     for(let i = 0; i < workers.workers.length; i++) {
         let worker = workers.workers[i];
 
+        let box = document.createElement("div");
+        box.classList.add("w-100", "list-group-item", "py-5", "lh-sm", "border");
+
         let section = document.createElement("div");
-        section.classList.add("section");
+        section.classList.add("d-flex", "w-100", "align-items-left", "justify-content-between", "flex-column");
 
         let name = document.createElement("h4");
         name.innerHTML = worker.name;
         section.appendChild(name);
 
         let info = document.createElement("p");
-        info.classList.add("info");
         info.innerHTML = `Currently working on "${worker.currentlyrendering}"`;
         section.appendChild(info);
 
@@ -57,6 +58,7 @@ async function workersTask() {
         }
         section.appendChild(logBox);
 
-        workersList.appendChild(section);
+        box.appendChild(section);
+        workersList.appendChild(box);
     }
 }
