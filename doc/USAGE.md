@@ -20,6 +20,8 @@ The web interface is the interface for uploading blender projects, viewing the s
 
 ![home page](./img/home-page.png)
 
+NOTE: The home page may look different from what is displayed in this documentation due to UI changes, but all the buttons will retain the same functionality - following through the process will give the same result!
+
 The home page will show all projects that are currently rendering in a list, and the storage consumed by it. On each item, rendered or unrendered, there is the option to delete it. Some things are of note here:
 
 - Deleting an unrendered project will delete exactly the same, however all the progress made on the render will be lost.

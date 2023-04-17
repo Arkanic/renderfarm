@@ -1,0 +1,24 @@
+@import "bootstrap/scss/bootstrap";
+
+.hidden {
+    display: none !important;
+}
+
+.padsml {
+    padding: 1rem;
+}
+
+.terminal {
+    padding-top: 10px;
+    height: 200px;
+    width: 75%;
+    border: 1px solid white;
+    background-color: black;
+    font-family: monospace;
+    overflow: auto;
+
+    p {
+        margin: 0;
+        color: white;
+    }
+}

@@ -1,6 +1,8 @@
 const path = require("path");
+const autoprefixer = require("autoprefixer");
 const {CleanWebpackPlugin} = require("clean-webpack-plugin");
 const TerserJSPlugin = require("terser-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 function relative(dir) {
     return path.resolve(__dirname, dir);
@@ -42,11 +44,32 @@ module.exports = {
                 test: /.tsx?/,
                 exclude: /node_modules/,
                 loader: "ts-loader"
+            },
+            {
+                test: /\.(scss)$/,
+                use: [
+                    "style-loader",
+                    "css-loader",
+                    {
+                        loader: "postcss-loader",
+                        options: {
+                            postcssOptions: {
+                                plugins:() => [
+                                    autoprefixer
+                                ]
+                            }
+                        }
+                    },
+                    "sass-loader"
+                ]
             }
         ]
     },
 
     plugins: [
-        new CleanWebpackPlugin({})
+        new CleanWebpackPlugin({}),
+        new HtmlWebpackPlugin({
+            template: relative("./dashboard/index.html")
+        })
     ]
 }
