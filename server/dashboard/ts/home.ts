@@ -50,14 +50,9 @@ async function homeTask() {
 
         let section = document.createElement("div");
         section.classList.add("d-flex", "w-100", "align-items-left", "justify-content-between", "flex-column");
-        if(project.finished) {
-            let p = document.createElement("p");
-            p.innerHTML = "FINISHED";
-            section.appendChild(p);
-        }
 
         let title = document.createElement("h4");
-        title.innerHTML = project.title;
+        title.innerHTML = project.finished ? `${project.title} (finished) ` : project.title;
         section.appendChild(title);
 
         if(project.finished && project.message) {
@@ -75,20 +70,27 @@ async function homeTask() {
         }
 
         if(project.rendered) {
+            let linkbox = document.createElement("div");
+            linkbox.classList.add("d-flex", "justify-content-left", "w-25");
+
             let resultlink = document.createElement("a");
+            resultlink.classList.add("btn", "btn-success");
             resultlink.href = `${apiurl()}/dat/renders/${project.id}/result`;
             resultlink.innerHTML = `Finished result`;
             resultlink.target = "_blank";
-            section.appendChild(resultlink);
+            linkbox.appendChild(resultlink);
 
             let br = document.createElement("br");
-            section.appendChild(br);
+            linkbox.appendChild(br);
 
             let rawlink = document.createElement("a");
+            rawlink.classList.add("btn", "btn-success");
             rawlink.href = `${apiurl()}/dat/renders/${project.id}/raw`;
             rawlink.innerHTML = `Raw frames`;
             rawlink.target = "_blank";
-            section.appendChild(rawlink);
+            linkbox.appendChild(rawlink);
+
+            section.appendChild(linkbox);
         }
 
         let size = document.createElement("p");
@@ -98,7 +100,7 @@ async function homeTask() {
         let dateCreated = new Date(project.created);
         let info = document.createElement("p");
         info.classList.add("info");
-        info.innerHTML = `Created ${timeAgo.format(dateCreated)}`;
+        info.innerHTML = `Created ${timeAgo.format(dateCreated)}, ${((project.finishedchunks / project.totalchunks) * 100).toFixed(2)}% done`;
         section.appendChild(info);
 
         let progress = document.createElement("div");
@@ -110,7 +112,6 @@ async function homeTask() {
         bar.ariaValueMax = "100";
         bar.ariaValueNow = Math.round(((project.finishedchunks / project.totalchunks) * 100)).toString();
         bar.style.width = Math.round((project.finishedchunks / project.totalchunks) * 100).toString();
-        bar.innerText = ((project.finishedchunks / project.totalchunks) * 100).toFixed(2) + "%";
         progress.appendChild(bar);
         section.appendChild(progress);
 
