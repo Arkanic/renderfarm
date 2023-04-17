@@ -98,16 +98,16 @@
             </div>
             <div class="subcontent hidden" id="box-settings">
                 <div id="settings-main-box">
-                    <p><a href="#" id="settings-blenderupload-start">Upload new blender.tar.xz</a></p>
-                    <p><a href="#" id="settings-cleardb-start">Purge all database (bad)</a></p>
+                    <p><a class="btn btn-warning" href="#" id="settings-blenderupload-start">Upload new blender.tar.xz</a></p>
+                    <p><a class="btn btn-danger" href="#" id="settings-cleardb-start">Purge all database (bad)</a></p>
                 </div>
                 <div id="settings-blenderupload-box" class="hidden">
                     <form ref="blenderupload-form" id="settings-blenderupload-form" method="post" action="#" enctype="multipart/form-data">
                         <label for="settings-blenderfile">Blender.tar.xz (from blender.org): </label>
-                        <input type="file" id="settings-blenderfile" name="settings-blenderfile" accept=".tar.xz"/>
+                        <input type="file" id="settings-blenderfile" class="form-control" name="settings-blenderfile" accept=".tar.xz"/>
                         <br>
                         <p>Make sure the binary is the same architecture as the worker nodes</p>
-                        <input type="button" id="settings-blenderupload-submit" value="Submit"/>
+                        <input class="btn btn-primary" type="button" id="settings-blenderupload-submit" value="Submit"/>
                     </form>
                 </div>
                 <div id="settings-uploading-box" class="hidden">
