@@ -283,7 +283,8 @@ export default (ctx:Context) => {
             let title = "";
             if(renderNode.working) {
                 let project = await ctx.dbc.getById("projects", renderNode.currentlyDoing.split("_")[0]);
-                title = project.title;
+                if(!project) title = "Deleted project";
+                else title = project.title;
             } else title = "Nothing";
 
             serializedNodes.push({
