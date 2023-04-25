@@ -20,7 +20,7 @@ module.exports = {
     },
 
     output: {
-        filename: "[name].js",
+        filename: "[contenthash].js",
         path: relative("./dashboard-build")
     },
 
@@ -28,7 +28,10 @@ module.exports = {
         minimizer: [
             new TerserJSPlugin({})
         ],
-        usedExports: true
+        usedExports: true,
+        splitChunks: {
+            chunks: "all"
+        }
     },
 
     resolve: {
