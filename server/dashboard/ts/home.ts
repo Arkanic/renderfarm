@@ -1,12 +1,8 @@
 import axios from "axios";
-import TimeAgo from "javascript-time-ago";
-import en from "javascript-time-ago/locale/en";
 import {apiurl, networkOptions} from "./networking";
 import {autoUpdate} from "./util/autoupdate";
 import * as types from "./types/api";
-
-TimeAgo.addDefaultLocale(en);
-const timeAgo = new TimeAgo("en-GB");
+import {timeAgo} from "./util/timeago";
 
 const UPDATE_RATE = 30; // ten seconds
 
@@ -100,7 +96,7 @@ async function homeTask() {
         let dateCreated = new Date(project.created);
         let info = document.createElement("p");
         info.classList.add("info");
-        info.innerHTML = `Created ${timeAgo.format(dateCreated)}, ${((project.finishedchunks / project.totalchunks) * 100).toFixed(2)}% done`;
+        info.innerHTML = `Created ${timeAgo(dateCreated)} ago, ${((project.finishedchunks / project.totalchunks) * 100).toFixed(2)}% done`;
         section.appendChild(info);
 
         section.appendChild(document.createElement("p"));
