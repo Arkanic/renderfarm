@@ -61,7 +61,7 @@
                         <p>Make sure to have the blender file set to relative paths (File > External Data > Make All Paths Relative).<br>All fluid cache, external images, etc should be included in the zip file as well.</p>
                         <input type="button" id="upload-upload-submit" class="btn btn-primary" value="Next"/>
                     </div>
-                    <div id="upload-loading-box" class="hidden">
+                    <div id="upload-loading-box" class="hidden w-50">
                         <p></p>
                         <div class="d-flex justify-content-center">
                             <div class="spinner-border spinner-border-lg" role="status" style="width: 3rem; height: 3rem;"></div>
@@ -74,6 +74,7 @@
                         <input type="text" name="upload-title" id="upload-title" class="form-control"></input>
                         <label for="upload-animation" class="form-check-label">Animation: </label>
                         <input type="checkbox" name="upload-animation" id="upload-animation" class="form-check-input"/>
+                        <p></p>
                         <label for="upload-framestart" id="upload-framestart-label">Frame to render: </label>
                         <input type="number" name="upload-framestart" id="upload-framestart" value="1" class="form-control"/>
                         <label for="upload-frameend" id="upload-frameend-label" class="hidden">End frame of animation: </label>
