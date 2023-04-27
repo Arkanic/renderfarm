@@ -3,6 +3,7 @@ import path from "path";
 import {spawn} from "child_process";
 
 import {createCanvas, loadImage} from "node-canvas";
+import mime from "mime-types";
 
 import {DiscriminatedUnion} from "./discriminatedUnion";
 import {Context} from "../server";
@@ -78,7 +79,7 @@ let thumbnailCache:{[unit:string]:ThumbnailCache} = {};
  * 
  * @returns path of thumbnail
  */
-export async function getThumbnail(ctx:Context, projectid:string | number):string {
+export async function getThumbnail(ctx:Context, projectid:string | number):Promise<string> {
     if(!fs.existsSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR))) fs.mkdirSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR));
     const defaultThumbnailPath = path.join(__dirname, "assets", constants.DEFAULT_THUMBNAIL_NAME);
 
@@ -123,13 +124,33 @@ export async function getThumbnail(ctx:Context, projectid:string | number):strin
     }
 
     // ok, we can generate
+    console.log("generating thumbnail");
 
     let format = getImagesFormat(`${project.id}_${renderdata.framestart}_0_0`); // so we know if it is png or jpeg
     let imagesPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw");
     let sampleImage = await loadImage(path.join(imagesPath, `${project.id}_${renderdata.framestart}_0_0.${format}`));
+    let imageWidth = constants.THUMBNAIL_WIDTH;
+    let imageHeight = imageWidth / (sampleImage.width / sampleImage.height);
+    let {cutinto, framestart} = renderdata;
 
+    let canvas = createCanvas(imageWidth, imageHeight);
+    let c = canvas.getContext("2d");
+    for(let row = 0; row < cutinto; row++) {
+        for(let col = 0; col < cutinto; col++) {
+            let image = await loadImage(path.join(imagesPath, `${project.id}_${framestart}_${row}_${col}.${format}`));
+            c.drawImage(image, 0, 0, imageWidth, imageHeight);
+        }
+    }
 
-    let canvas = createCanvas()
+    fs.writeFileSync(thumbPath, canvas.toBuffer("image/jpeg"));
+    thumbnailCache[projectid] = {
+        status: "done",
+        path: thumbPath
+    }
+
+    console.log("Done");
+
+    return thumbPath;
 }
 
 /**
@@ -160,7 +181,7 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
             }
         }
 
-        fs.writeFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", `frame-${frame}.${format}`), canvas.toBuffer());
+        fs.writeFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", `frame-${frame}.${format}`), canvas.toBuffer(mime.lookup(format) as unknown as any));
         console.log(`Combined frame ${frame}`);
         frame++;
     } while((renderdata.animation == 1) ? frame < renderdata.frameend : false);
