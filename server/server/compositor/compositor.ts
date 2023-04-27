@@ -4,6 +4,7 @@ import {spawn} from "child_process";
 
 import {createCanvas, loadImage} from "node-canvas";
 
+import {DiscriminatedUnion} from "./discriminatedUnion";
 import {Context} from "../server";
 import constants from "../constants";
 
@@ -63,6 +64,72 @@ async function framesToMp4(id:string, format:string, framerate:number) {
             resolve(code);
         });
     });
+}
+
+type ThumbnailCache = DiscriminatedUnion<"status", {
+    done: {path:string},
+    pending: {lastChecked:number}
+}>;
+// creating thumbnails is an expensive operation, so we keep a cache to check against
+let thumbnailCache:{[unit:string]:ThumbnailCache} = {};
+
+/**
+ * Get thumbnail for project
+ * 
+ * @returns path of thumbnail
+ */
+export async function getThumbnail(ctx:Context, projectid:string | number):string {
+    if(!fs.existsSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR))) fs.mkdirSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR));
+    const defaultThumbnailPath = path.join(__dirname, "assets", constants.DEFAULT_THUMBNAIL_NAME);
+
+    console.log(`Cache for ${projectid}`);
+    if(thumbnailCache[projectid]) { // cache entry exists
+        console.log("cache entry exists");
+        let cacheEntry = thumbnailCache[projectid];
+        if(cacheEntry.status === "done") {console.log("cache entry is done"); return cacheEntry.path;} // cache is complete
+        else if(cacheEntry.status === "pending") { // cache is incomplete
+            console.log("cache entry is incomplete");
+            if(cacheEntry.lastChecked + constants.THUMBNAIL_RECHECK_INTERVAL < Date.now()) {console.log("cache entry is below regen threshold"); return defaultThumbnailPath;} // cache is checked too soon to retry
+        }
+    }
+
+    console.log("generating cache entry");
+
+    const thumbDir = path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR);
+    const thumbPath = path.join(thumbDir, `${projectid}.jpg`);
+    if(fs.existsSync(thumbPath)) { // has already been generated!
+        thumbnailCache[projectid] = {
+            status: "done",
+            path: thumbPath
+        };
+        return thumbPath;
+    }
+    
+    // ok, we need to generate
+    let project = await ctx.dbc.getById("projects", projectid);
+    let renderdata = await ctx.dbc.getById("renderdata", project.renderdata_index);
+    let finishedChunks:Array<string> = JSON.parse(renderdata.finished_chunks);
+    let firstFrameFinishedChunks = finishedChunks.filter(chunk => chunk.split("_")[1] === String(renderdata.framestart));
+
+    if(firstFrameFinishedChunks.length < renderdata.cutinto * renderdata.cutinto) { // not enough to complete the first frame
+        console.log("do not have enough data to generate thumbnail");
+
+        thumbnailCache[projectid] = {
+            status: "pending",
+            lastChecked: Date.now()
+        };
+
+        return defaultThumbnailPath;
+    }
+
+    // ok, we can generate
+
+    let format = getImagesFormat(`${project.id}_${renderdata.framestart}_0_0`); // so we know if it is png or jpeg
+    let imagesPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw");
+    let sampleImage = await loadImage(path.join(imagesPath, `${project.id}_${renderdata.framestart}_0_0.${format}`));
+
+
+    let canvas = createCanvas()
 }
 
 /**
