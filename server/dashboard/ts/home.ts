@@ -73,6 +73,38 @@ async function homeTask() {
             section.appendChild(messagesBox);
         }
 
+        let size = document.createElement("p");
+        size.innerHTML = `Size: ${(project.size / 1000000).toFixed(2)}mb`;
+        section.appendChild(size);
+
+        let progressText = document.createElement("p");
+
+        let ptCurrent = document.createElement("span");
+        ptCurrent.innerHTML = `${project.currentlyrenderingchunks}/`;
+        ptCurrent.setAttribute("data-toggle", "tooltip");
+        ptCurrent.title = "Currently rendering chunks";
+        progressText.appendChild(ptCurrent);
+
+        let ptDone = document.createElement("span");
+        ptDone.innerHTML = `${project.finishedchunks}/`;
+        ptDone.setAttribute("data-toggle", "tooltip");
+        ptDone.title = "Finished chunks";
+        progressText.appendChild(ptDone);
+
+        let ptTotal = document.createElement("span");
+        ptTotal.innerHTML = `${project.totalchunks}`;
+        ptTotal.setAttribute("data-toggle", "tooltip");
+        ptTotal.title = "Total chunks in project";
+        progressText.appendChild(ptTotal);
+
+        section.appendChild(progressText);
+
+        let dateCreated = new Date(project.created);
+        let info = document.createElement("p");
+        info.classList.add("info");
+        info.innerHTML = `Created ${timeAgo(dateCreated)} ago, ${((project.finishedchunks / project.totalchunks) * 100).toFixed(2)}% done`;
+        section.appendChild(info);
+
         if(project.rendered) {
             let linkbox = document.createElement("div");
             linkbox.classList.add("d-flex", "justify-content-left", "w-50", "px-2");
@@ -95,19 +127,12 @@ async function homeTask() {
             linkbox.appendChild(rawlink);
 
             section.appendChild(linkbox);
+
+            section.appendChild(document.createElement("p"));
         }
 
-        let size = document.createElement("p");
-        size.innerHTML = `Size: ${(project.size / 1000000).toFixed(2)}mb`;
-        section.appendChild(size);
-
-        let dateCreated = new Date(project.created);
-        let info = document.createElement("p");
-        info.classList.add("info");
-        info.innerHTML = `Created ${timeAgo(dateCreated)} ago, ${((project.finishedchunks / project.totalchunks) * 100).toFixed(2)}% done (${project.currentlyrenderingchunks} chunks rendering now)`;
-        section.appendChild(info);
-
-        section.appendChild(document.createElement("p"));
+        let deleteButtonBox = document.createElement("div");
+        deleteButtonBox.classList.add("px-2");
 
         let deleteButton = document.createElement("button");
         deleteButton.classList.add("btn", "btn-outline-danger", "btn-block", "w-25");
@@ -120,7 +145,9 @@ async function homeTask() {
 
             await homeTask();
         });
-        section.appendChild(deleteButton);
+
+        deleteButtonBox.appendChild(deleteButton);
+        section.appendChild(deleteButtonBox);
 
         box.appendChild(section);
         projectsList.appendChild(box);
