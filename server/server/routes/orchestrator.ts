@@ -523,7 +523,7 @@ export default (ctx:Context) => {
         let filepath = await getThumbnail(ctx, id);
         
         res.status(200).sendFile(filepath, {root: "."});
-    })
+    });
 
     // project files
     api.get("/dat/projects/:id", (req, res, next) => {

@@ -81,7 +81,7 @@ let thumbnailCache:{[unit:string]:ThumbnailCache} = {};
  */
 export async function getThumbnail(ctx:Context, projectid:string | number):Promise<string> {
     if(!fs.existsSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR))) fs.mkdirSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR));
-    const defaultThumbnailPath = path.join(__dirname, "assets", constants.DEFAULT_THUMBNAIL_NAME);
+    const defaultThumbnailPath = path.join("server", "compositor", "assets", constants.DEFAULT_THUMBNAIL_NAME);
 
     console.log(`Cache for ${projectid}`);
     if(thumbnailCache[projectid]) { // cache entry exists
