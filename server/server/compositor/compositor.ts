@@ -3,7 +3,9 @@ import path from "path";
 import {spawn} from "child_process";
 
 import {createCanvas, loadImage} from "node-canvas";
+import mime from "mime-types";
 
+import {DiscriminatedUnion} from "./discriminatedUnion";
 import {Context} from "../server";
 import constants from "../constants";
 
@@ -65,6 +67,98 @@ async function framesToMp4(id:string, format:string, framerate:number) {
     });
 }
 
+type ThumbnailCache = DiscriminatedUnion<"status", {
+    done: {path:string},
+    pending: {lastChecked:number}
+}>;
+// creating thumbnails is an expensive operation, so we keep a cache to check against
+let thumbnailCache:{[unit:string]:ThumbnailCache} = {};
+
+/**
+ * Get thumbnail for project
+ * 
+ * @returns path of thumbnail
+ */
+export async function getThumbnail(ctx:Context, projectid:string | number):Promise<string> {
+    if(!fs.existsSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR))) fs.mkdirSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR));
+    const defaultThumbnailPath = path.join("server", "compositor", "assets", constants.DEFAULT_THUMBNAIL_NAME);
+
+    //console.log(`Cache for ${projectid}`);
+    if(thumbnailCache[projectid]) { // cache entry exists
+        //console.log("cache entry exists");
+        let cacheEntry = thumbnailCache[projectid];
+        if(cacheEntry.status === "done") {
+            //console.log("cache entry is done");
+            return cacheEntry.path;} // cache is complete
+        else if(cacheEntry.status === "pending") { // cache is incomplete
+            //console.log("cache entry is incomplete");
+            if(Date.now() < (cacheEntry.lastChecked + constants.THUMBNAIL_RECHECK_INTERVAL)) {
+                //console.log("cache entry is below regen threshold");
+                return defaultThumbnailPath;
+            } // cache is checked too soon to retry
+        }
+    }
+
+    //console.log("generating cache entry");
+
+    const thumbDir = path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR);
+    const thumbPath = path.join(thumbDir, `${projectid}.jpg`);
+    if(fs.existsSync(thumbPath)) { // has already been generated!
+        //console.log("already exists");
+        thumbnailCache[projectid] = {
+            status: "done",
+            path: thumbPath
+        };
+        return thumbPath;
+    }
+    
+    // ok, we need to generate
+    let project = await ctx.dbc.getById("projects", projectid);
+    let renderdata = await ctx.dbc.getById("renderdata", project.renderdata_index);
+    let finishedChunks:Array<string> = JSON.parse(renderdata.finished_chunks);
+    let firstFrameFinishedChunks = finishedChunks.filter(chunk => chunk.split("_")[1] === String(renderdata.framestart));
+
+    if(firstFrameFinishedChunks.length < renderdata.cutinto * renderdata.cutinto) { // not enough to complete the first frame
+        //console.log("do not have enough data to generate thumbnail");
+
+        thumbnailCache[projectid] = {
+            status: "pending",
+            lastChecked: Date.now()
+        };
+
+        return defaultThumbnailPath;
+    }
+
+    // ok, we can generate
+    //console.log("generating thumbnail");
+
+    let format = getImagesFormat(`${project.id}_${renderdata.framestart}_0_0`); // so we know if it is png or jpeg
+    let imagesPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw");
+    let sampleImage = await loadImage(path.join(imagesPath, `${project.id}_${renderdata.framestart}_0_0.${format}`));
+    let imageWidth = constants.THUMBNAIL_WIDTH;
+    let imageHeight = imageWidth / (sampleImage.width / sampleImage.height);
+    let {cutinto, framestart} = renderdata;
+
+    let canvas = createCanvas(imageWidth, imageHeight);
+    let c = canvas.getContext("2d");
+    for(let row = 0; row < cutinto; row++) {
+        for(let col = 0; col < cutinto; col++) {
+            let image = await loadImage(path.join(imagesPath, `${project.id}_${framestart}_${row}_${col}.${format}`));
+            c.drawImage(image, 0, 0, imageWidth, imageHeight);
+        }
+    }
+
+    fs.writeFileSync(thumbPath, canvas.toBuffer("image/jpeg"));
+    thumbnailCache[projectid] = {
+        status: "done",
+        path: thumbPath
+    }
+
+    //console.log("Done");
+
+    return thumbPath;
+}
+
 /**
  * Ok lets stitch a scene into images
  */
@@ -93,7 +187,7 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
             }
         }
 
-        fs.writeFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", `frame-${frame}.${format}`), canvas.toBuffer());
+        fs.writeFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", `frame-${frame}.${format}`), canvas.toBuffer(mime.lookup(format) as unknown as any));
         console.log(`Combined frame ${frame}`);
         frame++;
     } while((renderdata.animation == 1) ? frame < renderdata.frameend : false);

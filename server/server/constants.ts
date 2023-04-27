@@ -4,6 +4,10 @@ export default {
     PROJECTS_DIR: "projects",
     RENDERS_DIR: "renders",
     TEMP_DIR: "temp",
+    THUMBNAIL_DIR: "thumbnails",
+    DEFAULT_THUMBNAIL_NAME: "thumbnail.jpg",
+    THUMBNAIL_WIDTH: 256,
+    THUMBNAIL_RECHECK_INTERVAL: 1000 * 60, // one minute
     HEARTBEAT_INTERVAL: 1000 * 60, // one minute
     TASK_WAIT_TIME: 1000 * 60, // one minute
     MAX_PROJ_ERRORS: 15, // maximum errors that can occur from a project before ditching it,

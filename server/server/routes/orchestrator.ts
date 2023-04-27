@@ -11,6 +11,7 @@ import {exit} from "process";
 
 import {Context, updateBlenderHash} from "../server";
 import * as protocol from "../protocol";
+import {getThumbnail} from "../compositor/compositor";
 import * as types from "../types/api";
 import constants from "../constants";
 import { nanoid } from "nanoid";
@@ -264,6 +265,7 @@ export default (ctx:Context) => {
         console.log(`Deleting project ${projects[0].title}`);
         fs.rmSync(path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${req.body.projectid}.zip`));
         fs.rmSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${req.body.projectid}`), {recursive: true, force: true});
+        fs.rmSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR, `${req.body.projectid}.jpg`));
 
         await dbc.deleteById("projects", req.body.projectid);
 
@@ -513,6 +515,15 @@ export default (ctx:Context) => {
     // /DAT data get requests
     api.get("/dat/blender.tar.xz", (req, res) => {
         res.status(200).sendFile(path.join(constants.DATA_DIR, "blender.tar.xz"), {root: "."});
+    });
+
+    // thumbnails
+    api.get("/dat/thumbnails/:id", async (req, res, next) => {
+        let id = parseInt(req.params.id);
+        if((await ctx.dbc.db("projects").where("id", id)).length === 0) return next();
+        let filepath = await getThumbnail(ctx, id);
+        
+        res.status(200).sendFile(filepath, {root: "."});
     });
 
     // project files
