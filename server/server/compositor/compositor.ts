@@ -83,22 +83,28 @@ export async function getThumbnail(ctx:Context, projectid:string | number):Promi
     if(!fs.existsSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR))) fs.mkdirSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR));
     const defaultThumbnailPath = path.join("server", "compositor", "assets", constants.DEFAULT_THUMBNAIL_NAME);
 
-    console.log(`Cache for ${projectid}`);
+    //console.log(`Cache for ${projectid}`);
     if(thumbnailCache[projectid]) { // cache entry exists
-        console.log("cache entry exists");
+        //console.log("cache entry exists");
         let cacheEntry = thumbnailCache[projectid];
-        if(cacheEntry.status === "done") {console.log("cache entry is done"); return cacheEntry.path;} // cache is complete
+        if(cacheEntry.status === "done") {
+            //console.log("cache entry is done");
+            return cacheEntry.path;} // cache is complete
         else if(cacheEntry.status === "pending") { // cache is incomplete
-            console.log("cache entry is incomplete");
-            if(Date.now() < (cacheEntry.lastChecked + constants.THUMBNAIL_RECHECK_INTERVAL)) {console.log("cache entry is below regen threshold"); return defaultThumbnailPath;} // cache is checked too soon to retry
+            //console.log("cache entry is incomplete");
+            if(Date.now() < (cacheEntry.lastChecked + constants.THUMBNAIL_RECHECK_INTERVAL)) {
+                //console.log("cache entry is below regen threshold");
+                return defaultThumbnailPath;
+            } // cache is checked too soon to retry
         }
     }
 
-    console.log("generating cache entry");
+    //console.log("generating cache entry");
 
     const thumbDir = path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR);
     const thumbPath = path.join(thumbDir, `${projectid}.jpg`);
     if(fs.existsSync(thumbPath)) { // has already been generated!
+        //console.log("already exists");
         thumbnailCache[projectid] = {
             status: "done",
             path: thumbPath
@@ -113,7 +119,7 @@ export async function getThumbnail(ctx:Context, projectid:string | number):Promi
     let firstFrameFinishedChunks = finishedChunks.filter(chunk => chunk.split("_")[1] === String(renderdata.framestart));
 
     if(firstFrameFinishedChunks.length < renderdata.cutinto * renderdata.cutinto) { // not enough to complete the first frame
-        console.log("do not have enough data to generate thumbnail");
+        //console.log("do not have enough data to generate thumbnail");
 
         thumbnailCache[projectid] = {
             status: "pending",
@@ -124,7 +130,7 @@ export async function getThumbnail(ctx:Context, projectid:string | number):Promi
     }
 
     // ok, we can generate
-    console.log("generating thumbnail");
+    //console.log("generating thumbnail");
 
     let format = getImagesFormat(`${project.id}_${renderdata.framestart}_0_0`); // so we know if it is png or jpeg
     let imagesPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw");
@@ -148,7 +154,7 @@ export async function getThumbnail(ctx:Context, projectid:string | number):Promi
         path: thumbPath
     }
 
-    console.log("Done");
+    //console.log("Done");
 
     return thumbPath;
 }

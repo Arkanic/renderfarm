@@ -51,6 +51,14 @@ async function homeTask() {
         title.innerHTML = project.finished ? `${project.title} (finished) ` : project.title;
         section.appendChild(title);
 
+        let thumbnail = document.createElement("img");
+        thumbnail.classList.add("rounded", "float-right", "img-thumbnail");
+        thumbnail.width = 128;
+        thumbnail.alt = `thumbnail of ${project.title}`;
+        thumbnail.src = `${apiurl()}/dat/thumbnails/${project.id}`;
+
+        section.appendChild(thumbnail);
+
         if(project.finished && project.message) {
             let messagesBox = document.createElement("div");
             messagesBox.classList.add("terminal");

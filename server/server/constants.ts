@@ -6,7 +6,7 @@ export default {
     TEMP_DIR: "temp",
     THUMBNAIL_DIR: "thumbnails",
     DEFAULT_THUMBNAIL_NAME: "thumbnail.jpg",
-    THUMBNAIL_WIDTH: 128,
+    THUMBNAIL_WIDTH: 256,
     THUMBNAIL_RECHECK_INTERVAL: 1000 * 60, // one minute
     HEARTBEAT_INTERVAL: 1000 * 60, // one minute
     TASK_WAIT_TIME: 1000 * 60, // one minute
