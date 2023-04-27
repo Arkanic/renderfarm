@@ -29,6 +29,7 @@ export interface ProjectsIndexFormattedProject {
     finished:boolean,
     rendered:boolean,
     finishedchunks:number,
+    currentlyrenderingchunks:number,
     totalchunks:number,
     size:number,
     message:string

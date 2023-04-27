@@ -228,6 +228,7 @@ export default (ctx:Context) => {
                 finished: project.finished ? true : false,
                 rendered: project.rendered ? true : false,
                 finishedchunks: JSON.parse(renderdata.finished_chunks).length,
+                currentlyrenderingchunks: orchestrator.currentlyRendering.length,
                 totalchunks: (renderdata.animation ? (renderdata.frameend - renderdata.framestart) : 1) * renderdata.cutinto * renderdata.cutinto,
                 size: renderdata.size,
                 message: project.message

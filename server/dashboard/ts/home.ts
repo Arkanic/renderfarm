@@ -96,7 +96,7 @@ async function homeTask() {
         let dateCreated = new Date(project.created);
         let info = document.createElement("p");
         info.classList.add("info");
-        info.innerHTML = `Created ${timeAgo(dateCreated)} ago, ${((project.finishedchunks / project.totalchunks) * 100).toFixed(2)}% done`;
+        info.innerHTML = `Created ${timeAgo(dateCreated)} ago, ${((project.finishedchunks / project.totalchunks) * 100).toFixed(2)}% done (${project.currentlyrenderingchunks} chunks rendering now)`;
         section.appendChild(info);
 
         section.appendChild(document.createElement("p"));

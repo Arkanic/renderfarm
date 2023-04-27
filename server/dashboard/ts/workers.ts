@@ -1,5 +1,6 @@
 import axios from "axios";
 import {autoUpdate} from "./util/autoupdate";
+import {createModal, ModalSize} from "./util/popup";
 import {apiurl, networkOptions} from "./networking";
 import * as types from "./types/api";
 
@@ -34,12 +35,12 @@ async function workersTask() {
         let worker = workers.workers[i];
 
         let box = document.createElement("div");
-        box.classList.add("w-100", "list-group-item", "py-5", "lh-sm", "border");
+        box.classList.add("list-item", "col-4", "border", "py-2");
 
         let section = document.createElement("div");
-        section.classList.add("d-flex", "w-100", "align-items-left", "justify-content-between", "flex-column");
+        section.classList.add("d-flex", "align-items-left", "justify-content-between", "flex-column");
 
-        let name = document.createElement("h4");
+        let name = document.createElement("h5");
         name.innerHTML = worker.name;
         section.appendChild(name);
 
@@ -47,16 +48,23 @@ async function workersTask() {
         info.innerHTML = `Currently working on "${worker.currentlyrendering}"`;
         section.appendChild(info);
 
-        let logBox = document.createElement("div");
-        logBox.classList.add("terminal");
+        let logButton = document.createElement("button");
+        logButton.classList.add("btn", "btn-primary");
+        logButton.innerHTML = "View Logs";
+        logButton.addEventListener("click", () => {
+            let logBox = document.createElement("div");
+            logBox.classList.add("terminal");
 
-        let parts = worker.logs.split("\n");
-        for(let part of parts) {
-            let log = document.createElement("p");
-            log.innerHTML = part;
-            logBox.appendChild(log);
-        }
-        section.appendChild(logBox);
+            let parts = worker.logs.split("\n");
+            for(let part of parts) {
+                let log = document.createElement("p");
+                log.innerHTML = part;
+                logBox.appendChild(log);
+            }
+
+            createModal(logBox, "Worker Logs", ModalSize.Large);
+        });
+        section.appendChild(logButton);
 
         box.appendChild(section);
         workersList.appendChild(box);
