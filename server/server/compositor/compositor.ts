@@ -90,7 +90,7 @@ export async function getThumbnail(ctx:Context, projectid:string | number):Promi
         if(cacheEntry.status === "done") {console.log("cache entry is done"); return cacheEntry.path;} // cache is complete
         else if(cacheEntry.status === "pending") { // cache is incomplete
             console.log("cache entry is incomplete");
-            if(cacheEntry.lastChecked + constants.THUMBNAIL_RECHECK_INTERVAL < Date.now()) {console.log("cache entry is below regen threshold"); return defaultThumbnailPath;} // cache is checked too soon to retry
+            if((cacheEntry.lastChecked + constants.THUMBNAIL_RECHECK_INTERVAL) > cacheEntry.lastChecked) {console.log("cache entry is below regen threshold"); return defaultThumbnailPath;} // cache is checked too soon to retry
         }
     }
 
