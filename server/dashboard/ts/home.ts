@@ -42,10 +42,10 @@ async function homeTask() {
         let project = projects.projects[i];
 
         let box = document.createElement("div");
-        box.classList.add("w-100", "list-group-item", "py-5", "lh-sm", "border");
+        box.classList.add("list-item", "col-6", "border", "py-2");
 
         let section = document.createElement("div");
-        section.classList.add("d-flex", "w-100", "align-items-left", "justify-content-between", "flex-column");
+        section.classList.add("d-flex", "align-items-left", "justify-content-between", "flex-column");
 
         let title = document.createElement("h4");
         title.innerHTML = project.finished ? `${project.title} (finished) ` : project.title;
@@ -67,10 +67,10 @@ async function homeTask() {
 
         if(project.rendered) {
             let linkbox = document.createElement("div");
-            linkbox.classList.add("d-flex", "justify-content-left", "w-25");
+            linkbox.classList.add("d-flex", "justify-content-left", "w-50", "px-2");
 
             let resultlink = document.createElement("a");
-            resultlink.classList.add("btn", "btn-success");
+            resultlink.classList.add("btn", "btn-success", "w-33");
             resultlink.href = `${apiurl()}/dat/renders/${project.id}/result`;
             resultlink.innerHTML = `Finished result`;
             resultlink.target = "_blank";
@@ -80,7 +80,7 @@ async function homeTask() {
             linkbox.appendChild(br);
 
             let rawlink = document.createElement("a");
-            rawlink.classList.add("btn", "btn-success");
+            rawlink.classList.add("btn", "btn-success", "w-33");
             rawlink.href = `${apiurl()}/dat/renders/${project.id}/raw`;
             rawlink.innerHTML = `Raw frames`;
             rawlink.target = "_blank";
