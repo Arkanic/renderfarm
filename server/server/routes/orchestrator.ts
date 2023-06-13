@@ -265,7 +265,7 @@ export default (ctx:Context) => {
         console.log(`Deleting project ${projects[0].title}`);
         fs.rmSync(path.join(constants.DATA_DIR, constants.PROJECTS_DIR, `${req.body.projectid}.zip`));
         fs.rmSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${req.body.projectid}`), {recursive: true, force: true});
-        fs.rmSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR, `${req.body.projectid}.jpg`));
+        if(fs.existsSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR, `${req.body.projectid}.jpg`))) fs.rmSync(path.join(constants.DATA_DIR, constants.THUMBNAIL_DIR, `${req.body.projectid}.jpg`));
 
         await dbc.deleteById("projects", req.body.projectid);
 
