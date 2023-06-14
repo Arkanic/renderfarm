@@ -4,7 +4,7 @@ import {autoUpdate} from "./util/autoupdate";
 import * as types from "./types/api";
 import {timeAgo} from "./util/timeago";
 
-const UPDATE_RATE = 30; // ten seconds
+const UPDATE_RATE = 15; // fifteen seconds
 
 let projectsList = document.getElementById("projects-list")!;
 let projectsSize = document.getElementById("projects-size")!;
