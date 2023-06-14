@@ -536,8 +536,8 @@ export default (ctx:Context) => {
         let id = parseInt(req.params.id);
         if((await ctx.dbc.db("projects").where("id", id)).length === 0) return next();
         let filepath = await getThumbnail(ctx, id);
-        
-        res.status(200).sendFile(filepath, {root: "."});
+
+        res.header("Cache-Control", "no-cache, no-store, must-revalidate").status(200).sendFile(filepath, {root: "."});
     });
 
     // project files
