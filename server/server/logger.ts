@@ -13,7 +13,7 @@ export default class Logger {
     constructor() {
         this.strings = [];
         this.unhook = intercept((txt:string) => {
-            this.strings.push(txt);
+            this.strings.push(txt.endsWith("\n") ? txt.slice(0, -1) : txt);
             while(this.strings.length > constants.LOG_BUFFER_LINES) this.strings.shift();
         });
     };
