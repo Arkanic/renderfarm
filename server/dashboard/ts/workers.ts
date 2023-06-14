@@ -1,7 +1,7 @@
 import axios from "axios";
 import {autoUpdate} from "./util/autoupdate";
 import {createModal, ModalSize} from "./util/popup";
-import {apiurl, networkOptions} from "./networking";
+import {apiPost, apiurl, networkOptions} from "./networking";
 import * as types from "./types/api";
 
 const UPDATE_RATE = 10;
@@ -20,7 +20,7 @@ export default async function workers() {
 
 async function workersTask() {
 
-    let workers:types.OnlineWorkersResponse = (await axios.post(`${apiurl()}/api/onlineworkers`, {}, networkOptions())).data;
+    let workers:types.OnlineWorkersResponse = await apiPost("/api/onlineworkers", {});
     if(!workers.success) {
         let p = document.createElement("p");
         p.classList.add("error");

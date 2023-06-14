@@ -1,5 +1,5 @@
-import axios, { AxiosRequestConfig } from "axios";
-import {apiurl, networkOptions} from "./networking";
+import axios, {AxiosRequestConfig} from "axios";
+import {apiurl, networkOptions, apiPost} from "./networking";
 import {base64ArrayBuffer} from "./b64";
 
 import * as types from "./types/api";
@@ -37,7 +37,7 @@ export default async function settings() {
         confirmation = prompt(`Are you really really sure? Type '${word}' to continue`);
         if(confirmation === null || confirmation !== word) return;
 
-        let res = await axios.post(`${apiurl()}/api/cleardb`, {password}, networkOptions());
+        let res = await apiPost("/api/cleardb", {password});
 
         if(res.status == 401) {
             alert("Password was incorrect!");

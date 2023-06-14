@@ -1,5 +1,5 @@
 import axios from "axios";
-import {apiurl, networkOptions} from "./networking";
+import {apiPost, apiurl, networkOptions} from "./networking";
 import {autoUpdate} from "./util/autoupdate";
 import * as types from "./types/api";
 
@@ -18,7 +18,7 @@ export default async function server() {
 }
 
 async function serverTask() {
-    let logs:types.ServerLogResponse = (await axios.post(`${apiurl()}/api/serverlog`, {}, networkOptions())).data;
+    let logs:types.ServerLogResponse = await apiPost("/api/serverlog", {});
     
     serverLogs.innerHTML = "";
 

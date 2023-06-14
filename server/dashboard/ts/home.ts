@@ -1,5 +1,5 @@
 import axios from "axios";
-import {apiurl, networkOptions} from "./networking";
+import {apiurl, networkOptions, apiPost} from "./networking";
 import {autoUpdate} from "./util/autoupdate";
 import * as types from "./types/api";
 import {timeAgo} from "./util/timeago";
@@ -20,7 +20,7 @@ export default async function home() {
 }
 
 async function homeTask() {
-    let projects:types.ProjectsIndexResponse = (await axios.post(`${apiurl()}/api/projectsindex`, {unfinishedonly: false}, networkOptions())).data;
+    let projects:types.ProjectsIndexResponse = await apiPost("/api/projectsindex", {unfinishedonly: false});
     // it didn't work, show message
     if(!projects.success) {
         projectsSize.innerText = projects.message!;
@@ -141,7 +141,7 @@ async function homeTask() {
             let confirmation = prompt("type 'yes' to confirm deletion")?.toLowerCase();
             if(confirmation === null || confirmation !== "yes") return;
 
-            await axios.post(`${apiurl()}/api/deleteproject`, {projectid: project.id}, networkOptions());
+            await apiPost("/api/deleteproject", {projectid: project.id});
 
             await homeTask();
         });
