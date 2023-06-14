@@ -324,6 +324,20 @@ export default (ctx:Context) => {
         exit(0);
     });
 
+    // Get server logs
+    api.post("/api/serverlog", async (req, res, next) => {
+        if(!valid(proto, req.body, "ServerLogRequest")) return next();
+
+        res.status(200).json({
+            success: true,
+            logs: ctx.logger.getLog()
+        });
+    });
+
+
+
+    // worker-centered commands
+
     // join server
     api.post("/api/join", async (req, res, next) => {
         if(!valid(proto, req.body, "JoinRequest")) return next();
