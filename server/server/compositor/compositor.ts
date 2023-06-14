@@ -130,7 +130,7 @@ export async function getThumbnail(ctx:Context, projectid:string | number):Promi
     }
 
     // ok, we can generate
-    //console.log("generating thumbnail");
+    console.log(`generating thumbnail for ${project.id}`);
 
     let format = getImagesFormat(`${project.id}_${renderdata.framestart}_0_0`); // so we know if it is png or jpeg
     let imagesPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw");
