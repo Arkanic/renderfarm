@@ -1,15 +1,37 @@
+import intercept from "intercept-stdout";
+
+import constants from "./constants";
+
 /**
  * Logger class meant to provide logging functions for both terminal and user-visible output
+ * Automatically captures all console.log output
  */
 export default class Logger {
-    constructor() {};
+    unhook;
+    private strings:Array<string>;
+
+    constructor() {
+        this.strings = [];
+        this.unhook = intercept((txt:string) => {
+            this.strings.push(txt);
+            while(this.strings.length > constants.LOG_BUFFER_LINES) this.strings.shift();
+        });
+    };
 
     /**
-     * Generic log function meant to replace console.log
-     * 
-     * @param msg list of strings to send
+     * Stop capturing input
+     * This is a once-only command, class has to be disposed of afterward
      */
-    log(...msg:any[]) {
-        console.log(...msg);
+    quit():void {
+        this.unhook();
+    };
+
+    /**
+     * Get array of log lines, up to LOG_BUFFER_LINES
+     * 
+     * @returns log array - one item is one line of log, going from oldest to most recent
+     */
+    getLog():Array<string> {
+        return this.strings;
     }
 }

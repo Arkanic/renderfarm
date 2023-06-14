@@ -12,5 +12,6 @@ export default {
     TASK_WAIT_TIME: 1000 * 60, // one minute
     MAX_PROJ_ERRORS: 15, // maximum errors that can occur from a project before ditching it,
     WORKER_LOG_NEWLINE_LENGTH: 50, // remember the previous 50 lines of the log per worker
-    BCRYPT_SALT_ROUNDS: 16
+    BCRYPT_SALT_ROUNDS: 16,
+    LOG_BUFFER_LINES: 50 // lines to keep in log arrau
 }

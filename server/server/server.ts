@@ -6,6 +6,7 @@ import {nanoid, customAlphabet} from "nanoid";
 
 import database, {DbConnection} from "./db";
 import constants from "./constants";
+import Logger from "./logger";
 
 import Orchestrator from "./orchestrator/orchestrator";
 
@@ -19,10 +20,12 @@ export interface Context {
     orchestrator:Orchestrator,
     serverhash:string,
     blenderhash:string,
-    verifyPassword:(pass:string) => boolean
+    verifyPassword:(pass:string) => boolean,
+    logger:Logger
 }
-
 let ctx:Context = null as any as Context;
+
+let logger = new Logger(); // start capturing stdout
 
 export function updateBlenderHash():string {
     let blenderLocation = `./${constants.DATA_DIR}/blender.tar.xz`;
@@ -86,7 +89,8 @@ database("production").then(async db => {
         blenderhash: "placeholder",
         verifyPassword: (pass:string) => {
             return bcrypt.compareSync(pass, password);
-        }
+        },
+        logger
     }
 
     updateBlenderHash();
