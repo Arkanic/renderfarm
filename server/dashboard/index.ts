@@ -3,6 +3,7 @@ import * as bootstrap from "bootstrap";
 
 import home from "./ts/home";
 import upload from "./ts/upload";
+import server from "./ts/server";
 import workers from "./ts/workers";
 import settings from "./ts/settings";
 
@@ -16,6 +17,7 @@ window.addEventListener("load", async () => {
 
     await home();
     await upload();
+    await server();
     await workers();
     await settings();
 

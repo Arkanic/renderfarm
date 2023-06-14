@@ -2,7 +2,7 @@
  * Start up the navbar handler so that clicking the buttons changes what "page" you are on
  */
 export async function startNavListener() {
-    let boxes = ["home", "workers", "upload", "settings"];
+    let boxes = ["home", "server", "workers", "upload", "settings"];
     for(let box of boxes) {
         let button = document.getElementById(`nav-${box}`)!;
         button.addEventListener("click", async e => {

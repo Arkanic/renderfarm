@@ -72,6 +72,12 @@ export interface ClearDBRequest {
 }
 export interface ClearDBResponse extends Response {}
 
+// Get logs of renderfarm server
+export interface ServerLogRequest {}
+export interface ServerLogResponse extends Response {
+    logs:Array<string>
+}
+
 // request to join renderfarm
 export interface JoinRequest {
     name:string
