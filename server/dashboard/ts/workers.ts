@@ -35,7 +35,7 @@ async function workersTask() {
         let worker = workers.workers[i];
 
         let box = document.createElement("div");
-        box.classList.add("list-item", "col-4", "border", "py-2");
+        box.classList.add("list-item", "col-4", "border", "py-2", "bg-body-tertiary");
 
         let section = document.createElement("div");
         section.classList.add("d-flex", "align-items-left", "justify-content-between", "flex-column");

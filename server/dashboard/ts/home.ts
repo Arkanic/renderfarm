@@ -42,7 +42,7 @@ async function homeTask() {
         let project = projects.projects[i];
 
         let box = document.createElement("div");
-        box.classList.add("list-item", "col-6", "border", "py-2");
+        box.classList.add("list-item", "col-6", "border", "py-2", "bg-body-tertiary");
 
         let section = document.createElement("div");
         section.classList.add("d-flex", "align-items-left", "justify-content-between", "flex-column");
