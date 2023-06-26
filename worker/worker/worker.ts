@@ -334,8 +334,7 @@ log(`I am ${name}`);
         let request:types.FinishjobRequest = {
             id: id,
             chunkid: job.chunkid,
-            statuscode: resultCode,
-
+            statuscode: resultCode
         } as unknown as types.FinishjobRequest;
 
         if(resultCode !== 0) {
@@ -353,7 +352,6 @@ log(`I am ${name}`);
             log("Blender success");
 
             let files = fs.readdirSync(TEMP_DIR).filter(o => o.startsWith("out"));
-            log(files.join(" "));
             if(files.length < 1) {
                 log("Out image doesn't exist!");
                 request.success = false;
@@ -383,6 +381,9 @@ log(`I am ${name}`);
                     log("Sending result image...");
                     await axios.post(`${surl}/api/finishjob`, request);
                 }
+
+                // clean up
+                fs.unlinkSync(path.join(TEMP_DIR, file)); // delete result image
             }
         }
 
