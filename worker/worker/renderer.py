@@ -20,6 +20,7 @@ rndr.use_border = True # we only want to render a specific portion of the image
 rndr.use_crop_to_border = False # but at the same time we do not want to crop the image to these dimensions (makes it easier to composite, now images can just be stacked ontop of one another)
 
 rndr.filepath = os.path.join(argv[0], "out")
+rndr.image_settings.file_format = "PNG"
 
 scene.frame_set(int(argv[1]))
 
