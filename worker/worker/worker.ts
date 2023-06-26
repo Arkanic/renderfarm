@@ -373,10 +373,15 @@ log(`I am ${name}`);
                     await axios.post(`${surl}/api/finishjob`, request);
                 } else {
                     let outputImagedata = fs.readFileSync(path.join(TEMP_DIR, "renderdata")).toString();
-                    let [fps, fps_base] = outputImagedata.split("\n").map(s => parseInt(s));
+                    let [fps, fps_base, resolution_x, resolution_y, resolution_percentage] = outputImagedata.split("\n").map(s => parseInt(s));
 
                     request.fps = fps;
                     request.fpsbase = fps_base;
+                    request.resolution = {
+                        x: resolution_x,
+                        y: resolution_y,
+                        percentage: resolution_percentage
+                    }
 
                     log("Sending result image...");
                     await axios.post(`${surl}/api/finishjob`, request);

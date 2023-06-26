@@ -122,7 +122,12 @@ export interface FinishjobRequest extends Request {
     statuscode:number,
     image:string,
     fps:number,
-    fpsbase:number
+    fpsbase:number,
+    resolution: {
+        x:number,
+        y:number,
+        percentage:number
+    }
 }
 export interface FinishjobResponse extends Response {}
 

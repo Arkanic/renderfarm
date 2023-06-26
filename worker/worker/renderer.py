@@ -48,5 +48,6 @@ except OSError:
     pass
 
 f = open(os.path.join(argv[0], "renderdata"), "w")
-f.write("{}\n{}".format(rndr.fps, rndr.fps_base)) # fps is the frames per second in a render, fps_base is the multiplier
+# fps fps_base rx ry rp
+f.write("{}\n{}\n{}\n{}\n{}\n".format(rndr.fps, rndr.fps_base, rndr.resolution_x, rndr.resolution_y, rndr.resolution_percentage)) # fps is the frames per second in a render, fps_base is the multiplier
 f.close()
