@@ -195,8 +195,9 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
     if(renderdata.animation) { // if it is an animation
         // we need to combine the frames into a video now
         console.log("Combining frames with ffmpeg");
-        let [fps, fpsbase] = fs.readFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "renderdata")).toString().split("\n").map(s => parseInt(s));
-        await framesToMp4(`${project.id}`, format, fps * fpsbase); // ok lets stitch
+        let rd = JSON.parse(fs.readFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "renderdata")).toString());
+        let {fps, fps_base} = rd;
+        await framesToMp4(`${project.id}`, format, fps * fps_base); // ok lets stitch
     } else {
         // rename image and dump it in
         console.log("Renaming image");
