@@ -166,11 +166,15 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
     let project = await ctx.dbc.getById("projects", projectid);
     let renderdata = await ctx.dbc.getById("renderdata", project.renderdata_index);
 
+    let rd = JSON.parse(fs.readFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "renderdata")).toString());
+    let {fps, fps_base} = rd;
+    let resolution = { // output image dimensions
+        width: rd.resolution_x * (rd.resolution_percentage / 100),
+        height: rd.resolution_y * (rd.resolution_percentage / 100)
+    };
+
     let format = getImagesFormat(`${project.id}_${renderdata.framestart}_0_0`); // so we know if it is png or jpeg
     let imagesPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw");
-
-    let sampleImage = await loadImage(path.join(imagesPath, `${project.id}_${renderdata.framestart}_0_0.${format}`));
-
 
     let finishedPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished");
     if(!fs.existsSync(finishedPath)) fs.mkdirSync(finishedPath); // path for all the finished stuff to go into
@@ -178,7 +182,7 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
     //for(let frame = renderdata.framestart; renderdata.animation ? frame < renderdata.frameend : !imageDone; frame++) {
     let frame = renderdata.framestart;
     do {
-        let canvas = createCanvas(sampleImage.width, sampleImage.height);
+        let canvas = createCanvas(resolution.width, resolution.height);
         let c = canvas.getContext("2d");
         for(let row = 0; row < renderdata.cutinto; row++) {
             for(let col = 0; col < renderdata.cutinto; col++) {
@@ -195,8 +199,6 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
     if(renderdata.animation) { // if it is an animation
         // we need to combine the frames into a video now
         console.log("Combining frames with ffmpeg");
-        let rd = JSON.parse(fs.readFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "renderdata")).toString());
-        let {fps, fps_base} = rd;
         await framesToMp4(`${project.id}`, format, fps * fps_base); // ok lets stitch
     } else {
         // rename image and dump it in
