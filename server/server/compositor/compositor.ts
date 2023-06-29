@@ -1,9 +1,6 @@
 import fs from "fs";
 import path from "path";
 
-import {createCanvas, loadImage} from "node-canvas";
-import mime from "mime-types";
-
 import {DiscriminatedUnion} from "./discriminatedUnion";
 import {Context} from "../server";
 import spawnProcess from "../util/spawn";
@@ -103,27 +100,21 @@ export async function getThumbnail(ctx:Context, projectid:string | number):Promi
 
     let format = getImagesFormat(`${project.id}_${renderdata.framestart}_0_0`); // so we know if it is png or jpeg
     let imagesPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw");
-    let sampleImage = await loadImage(path.join(imagesPath, `${project.id}_${renderdata.framestart}_0_0.${format}`));
-    let imageWidth = constants.THUMBNAIL_WIDTH;
-    let imageHeight = imageWidth / (sampleImage.width / sampleImage.height);
     let {cutinto, framestart} = renderdata;
 
-    let canvas = createCanvas(imageWidth, imageHeight);
-    let c = canvas.getContext("2d");
-    for(let row = 0; row < cutinto; row++) {
-        for(let col = 0; col < cutinto; col++) {
-            let image = await loadImage(path.join(imagesPath, `${project.id}_${framestart}_${row}_${col}.${format}`));
-            c.drawImage(image, 0, 0, imageWidth, imageHeight);
-        }
-    }
+    await imCompositeFrame(imagesPath, format, project.id, framestart, cutinto, thumbPath); // generate frame
+    await spawnProcess("convert", [ // resize to thumbnail size
+        "-resize", `${constants.THUMBNAIL_WIDTH}x${constants.THUMBNAIL_WIDTH}`,
+        thumbPath,
+        thumbPath
+    ]);
 
-    fs.writeFileSync(thumbPath, canvas.toBuffer("image/jpeg"));
     thumbnailCache[projectid] = {
         status: "done",
         path: thumbPath
     }
 
-    //console.log("Done");
+    console.log("Done");
 
     return thumbPath;
 }

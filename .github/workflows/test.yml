@@ -16,9 +16,6 @@ jobs:
         with:
           node-version: 16.x
       
-      - name: Install APT Dependencies
-        run: ./tools/packages-actions-ubuntu.sh
-      
       - name: Build Server
         run: |
           cd server
