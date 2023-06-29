@@ -128,6 +128,24 @@ export async function getThumbnail(ctx:Context, projectid:string | number):Promi
     return thumbPath;
 }
 
+
+async function imCompositeFrame(basePath:string, format:string, projectid:string | number, frame:number, cutinto:number, outPath:string):Promise<number> {
+    let components = [];
+    // overall path is top-left to bottom-right of image
+    for(let col = cutinto - 1; col >= 0; col--) { // columns are in reverse order
+        for(let row = 0; row < cutinto; row++) {
+            components.push(path.join(basePath, `${projectid}_${frame}_${row}_${col}.${format}`));
+        }
+    }
+
+    return spawnProcess("montage", [ // imagemagick montage
+        "-geometry", "+0+0",
+        "-tile", `${cutinto}x${cutinto}`,
+        ...components,
+        outPath
+    ]);
+}
+
 /**
  * Ok lets stitch a scene into images
  */
@@ -151,22 +169,9 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
     //for(let frame = renderdata.framestart; renderdata.animation ? frame < renderdata.frameend : !imageDone; frame++) {
     let frame = renderdata.framestart;
     do {
-        let canvas = createCanvas(resolution.width, resolution.height);
-        let c = canvas.getContext("2d");
+        let outPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", `frame-${frame}.${format}`);
+        await imCompositeFrame(imagesPath, format, project.id, frame, renderdata.cutinto, outPath)
 
-        let chunkSizes = {
-            width: resolution.width / renderdata.cutinto,
-            height: resolution.height / renderdata.cutinto
-        }
-
-        for(let row = 0; row < renderdata.cutinto; row++) {
-            for(let col = 0; col < renderdata.cutinto; col++) {
-                let image = await loadImage(path.join(imagesPath, `${project.id}_${frame}_${row}_${col}.${format}`));
-                c.drawImage(image, chunkSizes.width * row, (resolution.height - chunkSizes.height) - (chunkSizes.height * col));
-            }
-        }
-
-        fs.writeFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", `frame-${frame}.${format}`), canvas.toBuffer(mime.lookup(format) as unknown as any));
         console.log(`Combined frame ${frame}`);
         frame++;
     } while((renderdata.animation == 1) ? frame < renderdata.frameend : false);
