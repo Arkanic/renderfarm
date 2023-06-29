@@ -344,8 +344,6 @@ log(`I am ${name}`);
             request.errormessage = tempLog;
 
             request.image = "placeholder";
-            request.fps = 0;
-            request.fpsbase = 0;
 
             await axios.post(`${surl}/api/finishjob`, request);
         } else {
@@ -373,10 +371,15 @@ log(`I am ${name}`);
                     await axios.post(`${surl}/api/finishjob`, request);
                 } else {
                     let outputImagedata = fs.readFileSync(path.join(TEMP_DIR, "renderdata")).toString();
-                    let [fps, fps_base] = outputImagedata.split("\n").map(s => parseInt(s));
+                    let [fps, fps_base, resolution_x, resolution_y, resolution_percentage] = outputImagedata.split("\n").map(s => parseInt(s));
 
-                    request.fps = fps;
-                    request.fpsbase = fps_base;
+                    request.renderdata = {
+                        fps,
+                        fps_base,
+                        resolution_x,
+                        resolution_y,
+                        resolution_percentage
+                    }
 
                     log("Sending result image...");
                     await axios.post(`${surl}/api/finishjob`, request);

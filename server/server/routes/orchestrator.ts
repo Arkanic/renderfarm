@@ -474,8 +474,8 @@ export default (ctx:Context) => {
                     if(!fs.existsSync(path.join(theoreticalRenderSubfolder, "raw"))) fs.mkdirSync(path.join(theoreticalRenderSubfolder, "raw"));
                     fs.renameSync(location, path.join(theoreticalRenderSubfolder, "raw", `${response.chunkid}.${format}`)); // rename it to correct file
 
-                    let fpsStr = `${response.fps}\n${response.fpsbase}`;
-                    fs.writeFileSync(path.join(theoreticalRenderSubfolder, "renderdata"), fpsStr); // write renderdata to string
+                    let renderdataStr = JSON.stringify(response.renderdata);
+                    fs.writeFileSync(path.join(theoreticalRenderSubfolder, "renderdata"), renderdataStr); // write renderdata to string
                 } catch(err) {
                     console.log(err);
                     let location = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${response.chunkid}.tmp`);

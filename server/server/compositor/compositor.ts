@@ -1,12 +1,9 @@
 import fs from "fs";
 import path from "path";
-import {spawn} from "child_process";
-
-import {createCanvas, loadImage} from "node-canvas";
-import mime from "mime-types";
 
 import {DiscriminatedUnion} from "./discriminatedUnion";
 import {Context} from "../server";
+import spawnProcess from "../util/spawn";
 import constants from "../constants";
 
 /**
@@ -27,44 +24,13 @@ function getImagesFormat(firstChunkid:string):string {
 
 async function zipDir(dir:string, out:string) {
     console.log(`Zipping ${dir} into ${out}`);
-    return new Promise((resolve, reject) => {
-        const zip = spawn("zip", ["-r", out, dir]);
-        
-        zip.stdout.on("data", data => {
-            console.log(data.toString());
-        });
-
-        zip.stderr.on("data", data => {
-            console.log(data.toString());
-        });
-
-        zip.on("close", code => {
-            if(code != 0) reject(code);
-            resolve(code);
-        });
-    })
+    return spawnProcess("zip", ["-r", out, dir]);
 }
 
 async function framesToMp4(id:string, format:string, framerate:number) {
-    console.log("ffmpeg frame converting");
-    return new Promise((resolve, reject) => {
-        const ffmpeg = spawn("ffmpeg", ["-framerate", `${framerate}`,
-                                        `-i`, `data/renders/${id}/finished/frame-%d.PNG`,
-                                        `data/renders/${id}/finished/final.mp4`]);
-
-        ffmpeg.stdout.on("data", data => {
-            console.log(data.toString());
-        });
-
-        ffmpeg.stderr.on("data", data => {
-            console.log(data.toString());
-        });
-
-        ffmpeg.on("close", code => {
-            if(code != 0) return reject();
-            resolve(code);
-        });
-    });
+    return spawnProcess("ffmpeg", ["-framerate", `${framerate}`,
+                                    `-i`, `data/renders/${id}/finished/frame-%d.PNG`,
+                                    `data/renders/${id}/finished/final.mp4`]);
 }
 
 type ThumbnailCache = DiscriminatedUnion<"status", {
@@ -134,29 +100,41 @@ export async function getThumbnail(ctx:Context, projectid:string | number):Promi
 
     let format = getImagesFormat(`${project.id}_${renderdata.framestart}_0_0`); // so we know if it is png or jpeg
     let imagesPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw");
-    let sampleImage = await loadImage(path.join(imagesPath, `${project.id}_${renderdata.framestart}_0_0.${format}`));
-    let imageWidth = constants.THUMBNAIL_WIDTH;
-    let imageHeight = imageWidth / (sampleImage.width / sampleImage.height);
     let {cutinto, framestart} = renderdata;
 
-    let canvas = createCanvas(imageWidth, imageHeight);
-    let c = canvas.getContext("2d");
-    for(let row = 0; row < cutinto; row++) {
-        for(let col = 0; col < cutinto; col++) {
-            let image = await loadImage(path.join(imagesPath, `${project.id}_${framestart}_${row}_${col}.${format}`));
-            c.drawImage(image, 0, 0, imageWidth, imageHeight);
-        }
-    }
+    await imCompositeFrame(imagesPath, format, project.id, framestart, cutinto, thumbPath); // generate frame
+    await spawnProcess("convert", [ // resize to thumbnail size
+        "-resize", `${constants.THUMBNAIL_WIDTH}x${constants.THUMBNAIL_WIDTH}`,
+        thumbPath,
+        thumbPath
+    ]);
 
-    fs.writeFileSync(thumbPath, canvas.toBuffer("image/jpeg"));
     thumbnailCache[projectid] = {
         status: "done",
         path: thumbPath
     }
 
-    //console.log("Done");
+    console.log("Done");
 
     return thumbPath;
+}
+
+
+async function imCompositeFrame(basePath:string, format:string, projectid:string | number, frame:number, cutinto:number, outPath:string):Promise<number> {
+    let components = [];
+    // overall path is top-left to bottom-right of image
+    for(let col = cutinto - 1; col >= 0; col--) { // columns are in reverse order
+        for(let row = 0; row < cutinto; row++) {
+            components.push(path.join(basePath, `${projectid}_${frame}_${row}_${col}.${format}`));
+        }
+    }
+
+    return spawnProcess("montage", [ // imagemagick montage
+        "-geometry", "+0+0",
+        "-tile", `${cutinto}x${cutinto}`,
+        ...components,
+        outPath
+    ]);
 }
 
 /**
@@ -166,11 +144,15 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
     let project = await ctx.dbc.getById("projects", projectid);
     let renderdata = await ctx.dbc.getById("renderdata", project.renderdata_index);
 
+    let rd = JSON.parse(fs.readFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "renderdata")).toString());
+    let {fps, fps_base} = rd;
+    let resolution = { // output image dimensions
+        width: rd.resolution_x * (rd.resolution_percentage / 100),
+        height: rd.resolution_y * (rd.resolution_percentage / 100)
+    };
+
     let format = getImagesFormat(`${project.id}_${renderdata.framestart}_0_0`); // so we know if it is png or jpeg
     let imagesPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "raw");
-
-    let sampleImage = await loadImage(path.join(imagesPath, `${project.id}_${renderdata.framestart}_0_0.${format}`));
-
 
     let finishedPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished");
     if(!fs.existsSync(finishedPath)) fs.mkdirSync(finishedPath); // path for all the finished stuff to go into
@@ -178,16 +160,9 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
     //for(let frame = renderdata.framestart; renderdata.animation ? frame < renderdata.frameend : !imageDone; frame++) {
     let frame = renderdata.framestart;
     do {
-        let canvas = createCanvas(sampleImage.width, sampleImage.height);
-        let c = canvas.getContext("2d");
-        for(let row = 0; row < renderdata.cutinto; row++) {
-            for(let col = 0; col < renderdata.cutinto; col++) {
-                let image = await loadImage(path.join(imagesPath, `${project.id}_${frame}_${row}_${col}.${format}`));
-                c.drawImage(image, 0, 0);
-            }
-        }
+        let outPath = path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", `frame-${frame}.${format}`);
+        await imCompositeFrame(imagesPath, format, project.id, frame, renderdata.cutinto, outPath)
 
-        fs.writeFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "finished", `frame-${frame}.${format}`), canvas.toBuffer(mime.lookup(format) as unknown as any));
         console.log(`Combined frame ${frame}`);
         frame++;
     } while((renderdata.animation == 1) ? frame < renderdata.frameend : false);
@@ -195,8 +170,7 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
     if(renderdata.animation) { // if it is an animation
         // we need to combine the frames into a video now
         console.log("Combining frames with ffmpeg");
-        let [fps, fpsbase] = fs.readFileSync(path.join(constants.DATA_DIR, constants.RENDERS_DIR, `${project.id}`, "renderdata")).toString().split("\n").map(s => parseInt(s));
-        await framesToMp4(`${project.id}`, format, fps * fpsbase); // ok lets stitch
+        await framesToMp4(`${project.id}`, format, fps * fps_base); // ok lets stitch
     } else {
         // rename image and dump it in
         console.log("Renaming image");

@@ -17,7 +17,7 @@ scene = bpy.context.scene
 rndr = scene.render
 
 rndr.use_border = True # we only want to render a specific portion of the image
-rndr.use_crop_to_border = False # but at the same time we do not want to crop the image to these dimensions (makes it easier to composite, now images can just be stacked ontop of one another)
+rndr.use_crop_to_border = True # crop to region
 
 rndr.filepath = os.path.join(argv[0], "out")
 rndr.image_settings.file_format = "PNG"
@@ -48,5 +48,6 @@ except OSError:
     pass
 
 f = open(os.path.join(argv[0], "renderdata"), "w")
-f.write("{}\n{}".format(rndr.fps, rndr.fps_base)) # fps is the frames per second in a render, fps_base is the multiplier
+# fps fps_base rx ry rp
+f.write("{}\n{}\n{}\n{}\n{}\n".format(rndr.fps, rndr.fps_base, rndr.resolution_x, rndr.resolution_y, rndr.resolution_percentage)) # fps is the frames per second in a render, fps_base is the multiplier
 f.close()
