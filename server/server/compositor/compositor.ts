@@ -1,12 +1,12 @@
 import fs from "fs";
 import path from "path";
-import {spawn} from "child_process";
 
 import {createCanvas, loadImage} from "node-canvas";
 import mime from "mime-types";
 
 import {DiscriminatedUnion} from "./discriminatedUnion";
 import {Context} from "../server";
+import spawnProcess from "../util/spawn";
 import constants from "../constants";
 
 /**
@@ -27,44 +27,13 @@ function getImagesFormat(firstChunkid:string):string {
 
 async function zipDir(dir:string, out:string) {
     console.log(`Zipping ${dir} into ${out}`);
-    return new Promise((resolve, reject) => {
-        const zip = spawn("zip", ["-r", out, dir]);
-        
-        zip.stdout.on("data", data => {
-            console.log(data.toString());
-        });
-
-        zip.stderr.on("data", data => {
-            console.log(data.toString());
-        });
-
-        zip.on("close", code => {
-            if(code != 0) reject(code);
-            resolve(code);
-        });
-    })
+    return spawnProcess("zip", ["-r", out, dir]);
 }
 
 async function framesToMp4(id:string, format:string, framerate:number) {
-    console.log("ffmpeg frame converting");
-    return new Promise((resolve, reject) => {
-        const ffmpeg = spawn("ffmpeg", ["-framerate", `${framerate}`,
-                                        `-i`, `data/renders/${id}/finished/frame-%d.PNG`,
-                                        `data/renders/${id}/finished/final.mp4`]);
-
-        ffmpeg.stdout.on("data", data => {
-            console.log(data.toString());
-        });
-
-        ffmpeg.stderr.on("data", data => {
-            console.log(data.toString());
-        });
-
-        ffmpeg.on("close", code => {
-            if(code != 0) return reject();
-            resolve(code);
-        });
-    });
+    return spawnProcess("ffmpeg", ["-framerate", `${framerate}`,
+                                    `-i`, `data/renders/${id}/finished/frame-%d.PNG`,
+                                    `data/renders/${id}/finished/final.mp4`]);
 }
 
 type ThumbnailCache = DiscriminatedUnion<"status", {
