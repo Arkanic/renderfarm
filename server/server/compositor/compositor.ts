@@ -184,10 +184,16 @@ export async function compositeRender(ctx:Context, projectid:string | number) {
     do {
         let canvas = createCanvas(resolution.width, resolution.height);
         let c = canvas.getContext("2d");
+
+        let chunkSizes = {
+            width: resolution.width / renderdata.cutinto,
+            height: resolution.height / renderdata.cutinto
+        }
+
         for(let row = 0; row < renderdata.cutinto; row++) {
             for(let col = 0; col < renderdata.cutinto; col++) {
                 let image = await loadImage(path.join(imagesPath, `${project.id}_${frame}_${row}_${col}.${format}`));
-                c.drawImage(image, 0, 0);
+                c.drawImage(image, chunkSizes.width * row, (resolution.height - chunkSizes.height) - (chunkSizes.height * col));
             }
         }
 
