@@ -110,7 +110,8 @@ export interface GetjobResponse extends Response {
     cutinto:number,
     row:number,
     column:number,
-    blendfile:string
+    blendfile:string,
+    overscan:number
     // settings unused
 }
 

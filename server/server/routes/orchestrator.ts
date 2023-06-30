@@ -407,7 +407,8 @@ export default (ctx:Context) => {
             cutinto: job.cutinto,
             row: job.row,
             column: job.column,
-            blendfile: job.blendfile
+            blendfile: job.blendfile,
+            overscan: job.overscan
         }
 
         res.status(200).json(response);

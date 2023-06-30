@@ -16,7 +16,8 @@ export interface Project {
     framestart:number,
     frameend?:number,
     blendfile:string,
-    finishedChunks:Array<string>
+    finishedChunks:Array<string>,
+    overscan:number
 };
 
 export interface Job {
@@ -26,7 +27,8 @@ export interface Job {
     cutinto:number,
     row:number,
     column:number,
-    blendfile:string
+    blendfile:string,
+    overscan:number
 };
 
 class Orchestrator {
@@ -75,7 +77,8 @@ class Orchestrator {
             animation: unfinishedProjectRenderdata.animation as boolean,
             framestart: unfinishedProjectRenderdata.framestart as number,
             blendfile: unfinishedProjectRenderdata.blendfile as string,
-            finishedChunks: JSON.parse(unfinishedProjectRenderdata.finished_chunks) as Array<string>
+            finishedChunks: JSON.parse(unfinishedProjectRenderdata.finished_chunks) as Array<string>,
+            overscan: unfinishedProjectRenderdata.overscan as number
         }
         if(project.animation) project.frameend = unfinishedProjectRenderdata.frameend as number; // if it is an animation we know it has an end frame
 
@@ -104,7 +107,8 @@ class Orchestrator {
                 animation: unfinishedProjectRenderdata.animation as boolean,
                 framestart: unfinishedProjectRenderdata.framestart as number,
                 blendfile: unfinishedProjectRenderdata.blendfile as string,
-                finishedChunks: JSON.parse(unfinishedProjectRenderdata.finished_chunks) as Array<string>
+                finishedChunks: JSON.parse(unfinishedProjectRenderdata.finished_chunks) as Array<string>,
+                overscan: unfinishedProjectRenderdata.overscan as number
             }
             if(project.animation) project.frameend = unfinishedProjectRenderdata.frameend as number; // if it is an animation we know it has an end frame
 
@@ -183,7 +187,8 @@ class Orchestrator {
             cutinto: project.cutinto,
             row: parseInt(possibleChunks[0].split("_")[2]),
             column: parseInt(possibleChunks[0].split("_")[3]),
-            blendfile: project.blendfile
+            blendfile: project.blendfile,
+            overscan: project.overscan
         }
     }
 
