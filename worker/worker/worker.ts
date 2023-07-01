@@ -311,7 +311,8 @@ log(`I am ${name}`);
                 job.frame.toString(), // frame
                 job.cutinto.toString(), // what to split into?
                 job.row.toString(), // what row to render
-                job.column.toString() // what column to render
+                job.column.toString(), // what column to render
+                job.overscan.toString()
             ]);
 
             blender.stdout.on("data", data => {

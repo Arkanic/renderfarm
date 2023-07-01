@@ -28,6 +28,7 @@ scene.frame_set(int(argv[1]))
 cut_into = int(argv[2])
 row = int(argv[3])
 column = int(argv[4])
+overscan = int(argv[5])
 
 rndr.border_min_x = (1 / cut_into) * row
 rndr.border_max_x = (1 / cut_into) * (row + 1)
