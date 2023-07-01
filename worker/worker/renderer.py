@@ -43,14 +43,9 @@ if row > 0:
 if row < cut_into - 1:
     rndr.border_max_x += overscan_diff_x
 if column > 0:
-    rndr.border_max_y -= overscan_diff_y
+    rndr.border_min_y -= overscan_diff_y
 if column < cut_into - 1:
     rndr.border_max_y += overscan_diff_y
-
-print(rndr.border_min_x)
-print(rndr.border_max_x)
-print(rndr.border_min_y)
-print(rndr.border_max_y)
 
 bpy.ops.render.render(write_still = True)
 
