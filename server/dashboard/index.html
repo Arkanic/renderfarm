@@ -85,6 +85,7 @@
                         <select class="form-select" name="upload-blendfile" id="upload-blendfile"></select>
                         <label for="upload-title">Title: </label>
                         <input type="text" name="upload-title" id="upload-title" class="form-control"></input>
+                        <br>
                         <label for="upload-animation" class="form-check-label">Animation: </label>
                         <input type="checkbox" name="upload-animation" id="upload-animation" class="form-check-input"/>
                         <p></p>
@@ -94,7 +95,10 @@
                         <input type="number" name="upload-frameend" id="upload-frameend" class="hidden form-control"/>
                         <label for="upload-cutinto">Split image into x by x chunks: </label>
                         <input type="number" name="upload-cutinto" id="upload-cutinto" value="2" max="8" class="form-control"/>
+                        <label for="upload-overscan">Chunk overscan (px): </label>
+                        <input type="number" name="upload-overscan" id="upload-overscan" value="32" max="256" class="form-control"/>
                         <p>2 Is the recommended split chunks level (this will turn every image into 4 quarters to be rendered)<br>Having this set too high can actually increase the time taken to render because of all the initialization needed to be done before the start of the render.</p>
+                        <p>Overscan is the amount of pixels that the worker should go over on every side, which is then cropped down to the intended chunk size. The purpose of this is to remove the denoising "seams" present on the corners of some renders</p>
                         <input class="btn btn-primary" type="button" id="upload-config-submit" value="Submit"/>
                     </div>
                 </form>
