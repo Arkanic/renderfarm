@@ -299,11 +299,45 @@ console.log(`I am ${name}`);
 
                 await axios.post(`${surl}/api/finishjob`, request);
             } else {
-                let file = files.filter(f => f.startsWith("out"))[0]; // our image;
-                let outputImage = fs.readFileSync(path.join(TEMP_DIR, file));
+                let blenderOutput = files.filter(f => f.startsWith("out"))[0]; // our image;
+                let blenderOutputPath = path.join(TEMP_DIR, blenderOutput);
 
+                // trim overscanned edges from output image
+                // therefore removing seams from image
+                if(job.row > 0) {
+                    await spawnProcess("convert", [
+                        blenderOutputPath,
+                        "-gravity", "West",
+                        "-chop", `${job.overscan}x0`,
+                        blenderOutputPath
+                    ]);
+                }
+                if(job.row < job.cutinto - 1) {
+                    await spawnProcess("convert", [
+                        blenderOutputPath,
+                        "-gravity", "East",
+                        "-chop", `${job.overscan}x0`,
+                        blenderOutputPath
+                    ]);
+                }
+                if(job.column > 0) {
+                    await spawnProcess("convert", [
+                        blenderOutputPath,
+                        "-gravity", "South",
+                        "-chop", `0x${job.overscan}`,
+                        blenderOutputPath
+                    ]);
+                }
+                if(job.column < job.cutinto - 1) {
+                    await spawnProcess("convert", [
+                        blenderOutputPath,
+                        "-gravity", "North",
+                        "-chop", `0x${job.overscan}`,
+                        blenderOutputPath
+                    ]);
+                }
 
-
+                let outputImage = fs.readFileSync(blenderOutputPath);
                 request.success = true;
                 request.image = outputImage.toString("base64");
 
@@ -330,7 +364,7 @@ console.log(`I am ${name}`);
                 }
 
                 // clean up
-                fs.unlinkSync(path.join(TEMP_DIR, file)); // delete result image
+                fs.unlinkSync(blenderOutputPath); // delete result image
             }
         }
 
