@@ -1,6 +1,6 @@
 import intercept from "intercept-stdout";
 
-import constants from "./constants";
+const LOG_BUFFER_LINES = 50;
 
 /**
  * Logger class meant to provide logging functions for both terminal and user-visible output
@@ -15,7 +15,7 @@ export default class Logger {
         this.unhook = intercept((txt:string) => {
             let arr = (txt.endsWith("\n") ? txt.slice(0, -1) : txt).split("\n");
             for(let i in arr) this.strings.push(arr[i]);
-            while(this.strings.length > constants.LOG_BUFFER_LINES) this.strings.shift();
+            while(this.strings.length > LOG_BUFFER_LINES) this.strings.shift();
         });
     };
 
