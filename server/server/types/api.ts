@@ -15,7 +15,8 @@ export interface UploadProjectRequest {
     cutinto:number,
     animation:boolean,
     framestart:number,
-    frameend?:number
+    frameend?:number,
+    overscan:number
 }
 export interface UploadProjectResponse extends Response {
     projectid:string | number
@@ -110,7 +111,8 @@ export interface GetjobResponse extends Response {
     cutinto:number,
     row:number,
     column:number,
-    blendfile:string
+    blendfile:string,
+    overscan:number
     // settings unused
 }
 

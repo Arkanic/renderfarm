@@ -1,6 +1,7 @@
 import fs, {PathLike} from "fs";
 import path from "path";
-import {spawn} from "child_process";
+import Logger from "./util/logger";
+import spawnProcess from "./util/spawn";
 import {exit} from "process";
 import crypto, {BinaryToTextEncoding} from "crypto";
 
@@ -20,15 +21,7 @@ const TEMP_DIR = "./temp";
 const PRUNE_PROJECTS_INTERVAL = 1000 * 60 * 30; // every 30 minutes check
 const SEND_LOGS_INTERVAL = 1000 * 30; // every 30 seconds send current logs
 
-let previousLog:Array<string> = [];
-function log(str:string) {
-    console.log(str);
-    previousLog.push(str);
-}
-
-function resetLog() {
-    previousLog = [];
-}
+let logger = new Logger();
 
 console.log("Renderfarm worker");
 
@@ -45,45 +38,14 @@ function getFileHash(file:PathLike, as:BinaryToTextEncoding) {
     return fileHash.digest(as);
 }
 
-async function unzipTar(file:string):Promise<void> {
-    log(`Un-tar.xzing ${file}`)
-    return new Promise((resolve, reject) => {
-        const tar = spawn("tar", ["-xvf", file, "-C", BLENDER_DIR]);
+async function unzipTar(file:string):Promise<number> {
+    console.log(`Un-tar.xzing ${file}`)
 
-        tar.stdout.on("data", data => {
-            // response data, into a string, removing the last character (newline)
-            log(data.toString());
-        });
-
-        tar.stderr.on("data", data => {
-            log(data.toString());
-        });
-
-        tar.on("close", (code) => {
-            if(code != 0) return reject();
-            resolve();
-        });
-    });
+    return spawnProcess("tar", ["-xvf", file, "-C", BLENDER_DIR]);
 }
 
-async function unzipZip(file:string, to:string):Promise<void> {
-    return new Promise((resolve, reject) => {
-        const zip = spawn("unzip", [file, "-d", to]);
-
-        zip.stdout.on("data", data => {
-            // response data, into a string, removing the last character (newline)
-            log(data.toString());
-        });
-
-        zip.stderr.on("data", data => {
-            log(data.toString());
-        });
-
-        zip.on("close", (code) => {
-            if(code != 0) return reject();
-            resolve();
-        });
-    });
+async function unzipZip(file:string, to:string):Promise<number> {
+    return spawnProcess("unzip", [file, "-d", to]);
 }
 
 // make folders required by the code
@@ -97,29 +59,29 @@ makeFolders();
 
 // first up try to decipher server.txt to find what to connect to
 if(!fs.existsSync(SERVER_TXT)) {
-    log("ERR! No server.txt!!!\nMake a file called server.txt that contains the ip (ie 192.168.1.1) of the server!");
+    console.log("ERR! No server.txt!!!\nMake a file called server.txt that contains the ip (ie 192.168.1.1) of the server!");
     exit(1);
 }
 let sip = fs.readFileSync(SERVER_TXT).toString().split("\n")[0]; // only interested in the first line
 if(sip.split(".").length != 4) {
-    log("ERR! server.txt contains an invalid ip address!");
+    console.log("ERR! server.txt contains an invalid ip address!");
     exit(1);
 }
-log(`Server's IP is ${sip}`);
+console.log(`Server's IP is ${sip}`);
 
 let surl = `http://${sip}:2254`;
 
 let name = "";
 // ok now lets find our name or generate it
 if(!fs.existsSync(NAME_TXT)) {
-    log("Generating name for myself");
+    console.log("Generating name for myself");
     name = `${orc()} ${orc()}`; // shrig glur nogg
     fs.writeFileSync(NAME_TXT, name);
 } else {
-    log("Finding my name");
+    console.log("Finding my name");
     name = fs.readFileSync(NAME_TXT).toString().split("\n")[0];
 }
-log(`I am ${name}`);
+console.log(`I am ${name}`);
 
 // main code body, async wrapper so we can use neat await
 (async () => {
@@ -131,7 +93,7 @@ log(`I am ${name}`);
                 name
             })).data;
         } catch(err:any) {
-            log("Can't connect to server. sleeping for one minute then retry.");
+            console.log("Can't connect to server. sleeping for one minute then retry.");
             await delay(1000 * 60); // 1 minute
             continue;
         }
@@ -143,34 +105,34 @@ log(`I am ${name}`);
 
     try {
 
-    log("Checking server hash");
+    console.log("Checking server hash");
     if(fs.existsSync(SERVER_HASH_TXT)) {
         let oldServerHash = fs.readFileSync(SERVER_HASH_TXT).toString();
         if(oldServerHash != joinResponse.serverhash) {
-            log("It is different, removing old cache...");
+            console.log("It is different, removing old cache...");
             fs.rmSync(TEMP_DIR, {force: true, recursive: true});
             fs.rmSync(DATA_DIR, {force: true, recursive: true});
             makeFolders();
         } else {
-            log("It is the same");
+            console.log("It is the same");
         }
     }
     fs.writeFileSync(SERVER_HASH_TXT, joinResponse.serverhash);
-    log(joinResponse.serverhash);
+    console.log(joinResponse.serverhash);
 
-    log(`My id is "${id}"`);
+    console.log(`My id is "${id}"`);
 
     /**
      * Save blender.tar.xz to a file and unzip it
      */
     async function downloadProcessBlender() {
-        log("Downloading blender.tar.xz...");
+        console.log("Downloading blender.tar.xz...");
         let blenderdata = await axios.get(`${surl}/dat/blender.tar.xz`, {responseType: "arraybuffer"});
-        log("Writing blender.tar.xz to file...");
+        console.log("Writing blender.tar.xz to file...");
         fs.writeFileSync(BLENDER_TAR_XZ, blenderdata.data);
         if(getFileHash(BLENDER_TAR_XZ, "hex") !== joinResponse.blenderhash) {
-            log("Newly downloaded blender.tar.xz doesn't match the hash the server sent!!!\n(this is weird)");
-            log(`Local ${getFileHash(BLENDER_TAR_XZ, "hex")} vs Server ${joinResponse.blenderhash}`)
+            console.log("Newly downloaded blender.tar.xz doesn't match the hash the server sent!!!\n(this is weird)");
+            console.log(`Local ${getFileHash(BLENDER_TAR_XZ, "hex")} vs Server ${joinResponse.blenderhash}`)
             exit(1);
         }
         await unzipTar(BLENDER_TAR_XZ);
@@ -179,7 +141,7 @@ log(`I am ${name}`);
         let blenderVersionDir = fs.readdirSync(BLENDER_DIR)[0]; // there shouldn't be anything else in here.
         let blenderVersionDirContents = fs.readdirSync(path.join(BLENDER_DIR, blenderVersionDir));
         if(!blenderVersionDirContents.includes("blender")) {
-            log("Couldn't find blender in unzipped contents!!!");
+            console.log("Couldn't find blender in unzipped contents!!!");
             exit(1);
         }
 
@@ -189,32 +151,32 @@ log(`I am ${name}`);
 
     // lets see if we have the right blender now
     if(!fs.existsSync(BLENDER_TAR_XZ)) {
-        log("Downloading blender...");
+        console.log("Downloading blender...");
         await downloadProcessBlender();
     } else if(getFileHash(BLENDER_TAR_XZ, "hex") !== joinResponse.blenderhash) {
-        log("Downloading updated blender...");
-        log("Resetting files..."); // now we remove all traces of old blender
+        console.log("Downloading updated blender...");
+        console.log("Resetting files..."); // now we remove all traces of old blender
         fs.rmSync(BLENDER_DIR, {recursive: true, force: true});
         fs.unlinkSync(BLENDER_TAR_XZ);
         fs.mkdirSync(BLENDER_DIR);
         await downloadProcessBlender();
     } else {
-        log("Blender hash is the same");
+        console.log("Blender hash is the same");
     }
 
     const blenderLocation = fs.readFileSync(BLENDER_LOCATION_TXT).toString().split("\n")[0];
-    log(`Blender is at ${blenderLocation}`);
+    console.log(`Blender is at ${blenderLocation}`);
 
     /**
      * Prune old project files
      */
     async function pruneProjects() {
-        log("Pruning old projects...");
+        console.log("Pruning old projects...");
         let res = await axios.post(`${surl}/api/projectsindex`, {unfinishedonly: false});
         let data:types.ProjectsIndexResponse = res.data;
         if(!data.success) {
-            log("Projectsindex fail");
-            log(data.message || "No message provided");
+            console.log("Projectsindex fail");
+            console.log(data.message || "No message provided");
             exit(2);
         }
 
@@ -227,7 +189,7 @@ log(`I am ${name}`);
 
             let theoreticalPath = path.join(DATA_DIR, `${cachedProject}.zip`);
             if(fs.existsSync(theoreticalPath)) {
-                log(`Deleting finished project files of ${cachedProject}`);
+                console.log(`Deleting finished project files of ${cachedProject}`);
                 fs.unlinkSync(theoreticalPath);
 
                 // delete unzipped version
@@ -240,14 +202,11 @@ log(`I am ${name}`);
     await pruneProjects();
 
     setInterval(async () => {
-        if(previousLog.length == 0) return;
 
         await axios.post(`${surl}/api/updatelogs`, {
             id: id,
-            newlogs: previousLog.join("\n") + "\n"
+            newlogs: logger.getLog().join("\n") + "\n"
         });
-
-        resetLog();
     }, SEND_LOGS_INTERVAL);
 
     setInterval(async () => {
@@ -255,7 +214,7 @@ log(`I am ${name}`);
     }, joinResponse.heartbeatinterval);
 
     process.on("SIGTERM", async () => {
-        log("Received sigterm...");
+        console.log("Received sigterm...");
         await axios.post(`${surl}/api/leave`, {id: id});
     });
 
@@ -271,100 +230,119 @@ log(`I am ${name}`);
             if(job.available) {
                 iHaveJob = true; // yes!
             } else {
-                log(`No jobs available. Waiting ${Math.floor(job.waittime!/1000)}s before retrying`);
+                console.log(`No jobs available. Waiting ${Math.floor(job.waittime!/1000)}s before retrying`);
                 await delay(job.waittime!);
             }
         }
 
         // ok, we have a job now!
-        log(`Job Found! I am now doing part ${job.chunkid}`);
+        console.log(`Job Found! I am now doing part ${job.chunkid}`);
         
         let theoreticalPath = path.join(DATA_DIR, `${job.dataid}.zip`);
         if(!fs.existsSync(theoreticalPath)) {
-            log("Data for this project not cached, downloading...");
+            console.log("Data for this project not cached, downloading...");
             let projectdata = await axios.get(`${surl}/dat/projects/${job.dataid}`, {responseType: "arraybuffer"});
-            log("Saving...");
+            console.log("Saving...");
             fs.writeFileSync(theoreticalPath, projectdata.data);
 
-            log("Unzipping...");
+            console.log("Unzipping...");
             fs.mkdirSync(path.join(TEMP_DIR, `${job.dataid}`)); // if it is a number turn the id into a string
             await unzipZip(theoreticalPath, path.join(TEMP_DIR, `${job.dataid}`));
 
-            log("Done!");
+            console.log("Done!");
         } else {
-            log("I already have the data for this project cached. continuing...");
+            console.log("I already have the data for this project cached. continuing...");
         }
 
         // we have project file, go for it!
-        log(`Rendering ${job.chunkid}`);
-        log(`File is ${job.blendfile}, split into ${job.cutinto}x${job.cutinto}. I am rendering (${job.row}, ${job.column})`);
+        console.log(`Rendering ${job.chunkid}`);
+        console.log(`File is ${job.blendfile}, split into ${job.cutinto}x${job.cutinto}. I am rendering (${job.row}, ${job.column})`);
 
-        let tempLog = "";
+        let blenderResult = await spawnProcess(`./${blenderLocation}`, [ // launch blender
+            "-noaudio", // don't do audio, causes some strange crashes
+            "-b", path.join(TEMP_DIR, `${job.dataid}`, job.blendfile), // the blender file is here
+            "-P", "worker/renderer.py", // the script is here
+            "--", // options for the script
+            TEMP_DIR, // where to save out.whatever
+            job.frame.toString(), // frame
+            job.cutinto.toString(), // what to split into?
+            job.row.toString(), // what row to render
+            job.column.toString(), // what column to render
+            job.overscan.toString()
+        ]);
 
-        let resultCode = await (new Promise((resolve, reject) => {
-            let blender = spawn(`./${blenderLocation}`, [ // launch blender
-                "-noaudio", // don't do audio, causes some strange crashes
-                "-b", path.join(TEMP_DIR, `${job.dataid}`, job.blendfile), // the blender file is here
-                "-P", "worker/renderer.py", // the script is here
-                "--", // options for the script
-                TEMP_DIR, // where to save out.whatever
-                job.frame.toString(), // frame
-                job.cutinto.toString(), // what to split into?
-                job.row.toString(), // what row to render
-                job.column.toString() // what column to render
-            ]);
-
-            blender.stdout.on("data", data => {
-                log(data.toString());
-                tempLog += data.toString();
-            });
-
-            blender.stderr.on("data", data => {
-                log(data.toString());
-                tempLog += data.toString();
-            });
-
-            blender.on("close", code => {
-                resolve(code);
-            });
-        }));
-
-        log("Blender finished");
+        console.log("Blender finished");
 
         let request:types.FinishjobRequest = {
             id: id,
             chunkid: job.chunkid,
-            statuscode: resultCode
+            statuscode: blenderResult
         } as unknown as types.FinishjobRequest;
 
-        if(resultCode !== 0) {
-            log("Blender fail");
+        if(blenderResult !== 0) {
+            console.log("Blender fail");
 
             request.success = false;
-            request.errormessage = tempLog;
+            request.errormessage = logger.getLog().join("\n") + "\n";
 
             request.image = "placeholder";
 
             await axios.post(`${surl}/api/finishjob`, request);
         } else {
-            log("Blender success");
+            console.log("Blender success");
 
             let files = fs.readdirSync(TEMP_DIR).filter(o => o.startsWith("out"));
             if(files.length < 1) {
-                log("Out image doesn't exist!");
+                console.log("Out image doesn't exist!");
                 request.success = false;
                 request.errormessage = "Blender didn't produce an image";
 
                 await axios.post(`${surl}/api/finishjob`, request);
             } else {
-                let file = files.filter(f => f.startsWith("out"))[0]; // our image;
-                let outputImage = fs.readFileSync(path.join(TEMP_DIR, file));
+                let blenderOutput = files.filter(f => f.startsWith("out"))[0]; // our image;
+                let blenderOutputPath = path.join(TEMP_DIR, blenderOutput);
 
+                // trim overscanned edges from output image
+                // therefore removing seams from image
+                if(job.row > 0) {
+                    await spawnProcess("convert", [
+                        blenderOutputPath,
+                        "-gravity", "West",
+                        "-chop", `${job.overscan}x0`,
+                        blenderOutputPath
+                    ]);
+                }
+                if(job.row < job.cutinto - 1) {
+                    await spawnProcess("convert", [
+                        blenderOutputPath,
+                        "-gravity", "East",
+                        "-chop", `${job.overscan}x0`,
+                        blenderOutputPath
+                    ]);
+                }
+                if(job.column > 0) {
+                    await spawnProcess("convert", [
+                        blenderOutputPath,
+                        "-gravity", "South",
+                        "-chop", `0x${job.overscan}`,
+                        blenderOutputPath
+                    ]);
+                }
+                if(job.column < job.cutinto - 1) {
+                    await spawnProcess("convert", [
+                        blenderOutputPath,
+                        "-gravity", "North",
+                        "-chop", `0x${job.overscan}`,
+                        blenderOutputPath
+                    ]);
+                }
+
+                let outputImage = fs.readFileSync(blenderOutputPath);
                 request.success = true;
                 request.image = outputImage.toString("base64");
 
                 if(!fs.existsSync(path.join(TEMP_DIR, "renderdata"))) {
-                    log("Renderdata doesn't exist!");
+                    console.log("Renderdata doesn't exist!");
                     request.success = false;
                     request.errormessage = "Renderdata didn't exist for this image";
 
@@ -381,16 +359,16 @@ log(`I am ${name}`);
                         resolution_percentage
                     }
 
-                    log("Sending result image...");
+                    console.log("Sending result image...");
                     await axios.post(`${surl}/api/finishjob`, request);
                 }
 
                 // clean up
-                fs.unlinkSync(path.join(TEMP_DIR, file)); // delete result image
+                fs.unlinkSync(blenderOutputPath); // delete result image
             }
         }
 
-        log("Done!!!");
+        console.log("Done!!!");
     }
 
     } catch(err:any) {

@@ -59,8 +59,11 @@ export default (ctx:Context) => {
                 cutinto: parseInt(req.body["upload-cutinto"]),
                 animation: req.body["upload-animation"] ? true : false,
                 framestart: parseInt(req.body["upload-framestart"]),
-                frameend: Number.isNaN(parseInt(req.body["upload-frameend"])) ? 0 : parseInt(req.body["upload-frameend"]) + 1
+                frameend: Number.isNaN(parseInt(req.body["upload-frameend"])) ? 0 : parseInt(req.body["upload-frameend"]) + 1,
+                overscan: parseInt(req.body["upload-overscan"])
             }
+
+            if(data.cutinto < 0 || data.overscan < 0) return next();
         } catch(err) {
             return next();
         }
@@ -93,6 +96,7 @@ export default (ctx:Context) => {
 
 
         if(data.animation && !data.frameend) return next(); // if it is an animation there should be a frameend variable
+        if(data.animation && data.frameend! < data.framestart) return next();
 
 
         let zip = new JSZip();
@@ -137,7 +141,8 @@ export default (ctx:Context) => {
             framestart: data.framestart,
             frameend: 0,
             blendfile: data.blendfile,
-            size: totalSize
+            size: totalSize,
+            overscan: data.overscan
         };
         if(data.animation) renderdata.frameend = data.frameend!;
 
@@ -407,7 +412,8 @@ export default (ctx:Context) => {
             cutinto: job.cutinto,
             row: job.row,
             column: job.column,
-            blendfile: job.blendfile
+            blendfile: job.blendfile,
+            overscan: job.overscan
         }
 
         res.status(200).json(response);

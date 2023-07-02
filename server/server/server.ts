@@ -6,7 +6,7 @@ import {nanoid, customAlphabet} from "nanoid";
 
 import database, {DbConnection} from "./db";
 import constants from "./constants";
-import Logger from "./logger";
+import Logger from "./util/logger";
 
 import Orchestrator from "./orchestrator/orchestrator";
 
