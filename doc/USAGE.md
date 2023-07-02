@@ -119,6 +119,14 @@ This will produce 9 chunks that will be rendered seperately
 
 Cutinto is mainly useful for distributing a complex render that is a single frame among computers. There is not much having 20 computers if your render is stuck on one machine. Another use is for out-of-memory errors. By reducing the portion of the image being rendered the ram usage can also be reduced, so if blender is consistenly crashing due to running out of memory you may want to increase the cutinto.
 
+- **Overscan**: Due to blender's denoising, the tiles that the workers generate can occasionally have "seams" in them that are apparent in the final composited image. This feature attempts to get around this by getting the worker to render a slightly larger image, and then cropping the image back down again before sending it to the server. The purpose of this is to crop out the seams generated in the image, which then means that the seams will not show on the final image. This setting allows you to specify how much overscan in pixels you want per edge. For almost every case you can leave this as is, but if you notice weird dark seams in your image it could help to increase this number.
+
+Example of seams in an image:
+
+![image of a rendered sail, with seams apparent on the image](./img/sail.png)
+
+![close up of the above image, displaying the seams](./img/sail_detail.png)
+
 **Once you have chosen your correct options click "Submit" to start uploading the project**
 
 ![dashboard upload project finished](./img/upload-finish.png)
