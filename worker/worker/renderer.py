@@ -33,6 +33,8 @@ overscan = int(argv[5])
 overscan_diff_x = (1 / rndr.resolution_x) * overscan
 overscan_diff_y = (1 / rndr.resolution_y) * overscan
 
+rndr.resolution_percentage = 100
+
 rndr.border_min_x = (1 / cut_into) * row
 rndr.border_max_x = (1 / cut_into) * (row + 1)
 rndr.border_min_y = (1 / cut_into) * column
