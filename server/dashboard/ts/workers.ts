@@ -24,12 +24,12 @@ async function workersTask() {
     if(!workers.success) {
         let p = document.createElement("p");
         p.classList.add("error");
-        p.innerHTML = workers.message!;
+        p.innerText = workers.message!;
 
         return;
     }
 
-    workersList.innerHTML = "";
+    workersList.innerText = "";
 
     for(let i = 0; i < workers.workers.length; i++) {
         let worker = workers.workers[i];
@@ -41,16 +41,16 @@ async function workersTask() {
         section.classList.add("d-flex", "align-items-left", "justify-content-between", "flex-column");
 
         let name = document.createElement("h5");
-        name.innerHTML = worker.name;
+        name.innerText = worker.name;
         section.appendChild(name);
 
         let info = document.createElement("p");
-        info.innerHTML = `Currently working on "${worker.currentlyrendering}"`;
+        info.innerText = `Currently working on "${worker.currentlyrendering}"`;
         section.appendChild(info);
 
         let logButton = document.createElement("button");
         logButton.classList.add("btn", "btn-primary");
-        logButton.innerHTML = "View Logs";
+        logButton.innerText = "View Logs";
         logButton.addEventListener("click", () => {
             let logBox = document.createElement("div");
             logBox.classList.add("terminal");
@@ -58,7 +58,7 @@ async function workersTask() {
             let parts = worker.logs.split("\n");
             for(let part of parts) {
                 let log = document.createElement("p");
-                log.innerHTML = part;
+                log.innerText = part;
                 logBox.appendChild(log);
             }
 

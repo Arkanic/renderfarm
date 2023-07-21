@@ -58,7 +58,7 @@ export default async function upload() {
 
             let option = document.createElement("option");
             option.value = relativePath;
-            option.innerHTML = relativePath;
+            option.innerText = relativePath;
 
             blendfile.appendChild(option); // add this blender file to the dropdown
 
@@ -75,11 +75,11 @@ export default async function upload() {
 
     animation.addEventListener("change", e => {
         if(animation.checked) {
-            framestartLabel.innerHTML = "Animation start frame: ";
+            framestartLabel.innerText = "Animation start frame: ";
             frameend.classList.remove("hidden");
             frameendLabel.classList.remove("hidden");
         } else {
-            framestartLabel.innerHTML = "Frame to render: ";
+            framestartLabel.innerText = "Frame to render: ";
             frameend.classList.add("hidden");
             frameendLabel.classList.add("hidden");
         }
@@ -99,7 +99,7 @@ export default async function upload() {
         options.onUploadProgress = e => {
             let currentPercentage = Math.round((e.loaded * 100) / e.total!);
             progress.value = currentPercentage;
-            progressMessage.innerHTML = `Uploading... ${currentPercentage}%`;
+            progressMessage.innerText = `Uploading... ${currentPercentage}%`;
         }
         
 

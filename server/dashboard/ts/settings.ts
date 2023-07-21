@@ -72,7 +72,7 @@ export default async function settings() {
         options.onUploadProgress = e => {
             let currentPercentage = Math.round((e.loaded * 100) / e.total!);
             uploadingProgress.value = currentPercentage;
-            uploadingProgressMessage.innerHTML = `Uploading... ${currentPercentage}%`;
+            uploadingProgressMessage.innerText = `Uploading... ${currentPercentage}%`;
         }
 
         let res:types.UploadProjectResponse = (await axios.post(`${apiurl()}/form/uploadblender`,

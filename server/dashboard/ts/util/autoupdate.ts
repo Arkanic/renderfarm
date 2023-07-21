@@ -10,18 +10,18 @@
 export function autoUpdate(text:HTMLElement, updateButton:HTMLInputElement, cooldownTime:number, doTask:() => Promise<void>) {
     let countdown = cooldownTime;
     setInterval(async () => {
-        text.innerHTML = `Updating in ${Math.max(countdown, 0)}s`;
+        text.innerText = `Updating in ${Math.max(countdown, 0)}s`;
 
         countdown -= 1;
         if(countdown !== -1) return;
 
-        text.innerHTML = "Updating...";
+        text.innerText = "Updating...";
         await doTask();
         countdown = cooldownTime;
     }, 1000);
 
     updateButton.addEventListener("click", async () => {
-        text.innerHTML = "Updating...";
+        text.innerText = "Updating...";
         await doTask();
         countdown = cooldownTime;
     });

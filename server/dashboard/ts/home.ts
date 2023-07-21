@@ -28,7 +28,7 @@ async function homeTask() {
         return;
     }
 
-    projectsList.innerHTML = ""; // remove old content
+    projectsList.innerText = ""; // remove old content
 
     let totalSize = 0;
     for(let i = 0; i < projects.projects.length; i++) totalSize += projects.projects[i].size;
@@ -48,7 +48,7 @@ async function homeTask() {
         section.classList.add("d-flex", "align-items-left", "justify-content-between", "flex-column");
 
         let title = document.createElement("h4");
-        title.innerHTML = project.finished ? `${project.title} (finished) ` : project.title;
+        title.innerText = project.finished ? `${project.title} (finished) ` : project.title;
         section.appendChild(title);
 
         let thumbnail = document.createElement("img");
@@ -66,7 +66,7 @@ async function homeTask() {
             let parts = project.message.split("\n");
             for(let part of parts) {
                 let message = document.createElement("p");
-                message.innerHTML = part;
+                message.innerText = part;
                 messagesBox.appendChild(message);
             }
 
@@ -74,25 +74,25 @@ async function homeTask() {
         }
 
         let size = document.createElement("p");
-        size.innerHTML = `Size: ${(project.size / 1000000).toFixed(2)}mb`;
+        size.innerText = `Size: ${(project.size / 1000000).toFixed(2)}mb`;
         section.appendChild(size);
 
         let progressText = document.createElement("p");
 
         let ptCurrent = document.createElement("span");
-        ptCurrent.innerHTML = `${project.currentlyrenderingchunks}/`;
+        ptCurrent.innerText = `${project.currentlyrenderingchunks}/`;
         ptCurrent.setAttribute("data-toggle", "tooltip");
         ptCurrent.title = "Currently rendering chunks";
         progressText.appendChild(ptCurrent);
 
         let ptDone = document.createElement("span");
-        ptDone.innerHTML = `${project.finishedchunks}/`;
+        ptDone.innerText = `${project.finishedchunks}/`;
         ptDone.setAttribute("data-toggle", "tooltip");
         ptDone.title = "Finished chunks";
         progressText.appendChild(ptDone);
 
         let ptTotal = document.createElement("span");
-        ptTotal.innerHTML = `${project.totalchunks}`;
+        ptTotal.innerText = `${project.totalchunks}`;
         ptTotal.setAttribute("data-toggle", "tooltip");
         ptTotal.title = "Total chunks in project";
         progressText.appendChild(ptTotal);
@@ -102,7 +102,7 @@ async function homeTask() {
         let dateCreated = new Date(project.created);
         let info = document.createElement("p");
         info.classList.add("info");
-        info.innerHTML = `Created ${timeAgo(dateCreated)} ago, ${((project.finishedchunks / project.totalchunks) * 100).toFixed(2)}% done`;
+        info.innerText = `Created ${timeAgo(dateCreated)} ago, ${((project.finishedchunks / project.totalchunks) * 100).toFixed(2)}% done`;
         section.appendChild(info);
 
         if(project.rendered) {
@@ -112,7 +112,7 @@ async function homeTask() {
             let resultlink = document.createElement("a");
             resultlink.classList.add("btn", "btn-success", "w-33");
             resultlink.href = `${apiurl()}/dat/renders/${project.id}/result`;
-            resultlink.innerHTML = `Finished result`;
+            resultlink.innerText = `Finished result`;
             resultlink.target = "_blank";
             linkbox.appendChild(resultlink);
 
@@ -122,7 +122,7 @@ async function homeTask() {
             let rawlink = document.createElement("a");
             rawlink.classList.add("btn", "btn-success", "w-33");
             rawlink.href = `${apiurl()}/dat/renders/${project.id}/raw`;
-            rawlink.innerHTML = `Raw frames`;
+            rawlink.innerText = `Raw frames`;
             rawlink.target = "_blank";
             linkbox.appendChild(rawlink);
 
@@ -136,7 +136,7 @@ async function homeTask() {
 
         let deleteButton = document.createElement("button");
         deleteButton.classList.add("btn", "btn-outline-danger", "btn-block", "w-25");
-        deleteButton.innerHTML = "Delete";
+        deleteButton.innerText = "Delete";
         deleteButton.addEventListener("click", async () => {
             let confirmation = prompt("type 'yes' to confirm deletion")?.toLowerCase();
             if(confirmation === null || confirmation !== "yes") return;

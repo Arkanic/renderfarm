@@ -46,7 +46,7 @@ export function createModal(content:HTMLElement, title?:string, size:ModalSize =
     modalCloseBlock.type = "button";
     modalCloseBlock.classList.add("btn", "btn-primary");
     modalCloseBlock.setAttribute("data-dismiss", "modal");
-    modalCloseBlock.innerHTML = "Close";
+    modalCloseBlock.innerText = "Close";
     modalCloseBlock.addEventListener("click", () => {
         backdrop.style.display = "none";
         modalBox.style.display = "none";

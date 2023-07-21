@@ -20,12 +20,12 @@ export default async function server() {
 async function serverTask() {
     let logs:types.ServerLogResponse = await apiPost("/api/serverlog", {});
     
-    serverLogs.innerHTML = "";
+    serverLogs.innerText = "";
 
     for(let i in logs.logs) {
         let log = logs.logs[i];
         let part = document.createElement("p");
-        part.innerHTML = log;
+        part.innerText = log;
         serverLogs.appendChild(part);
     }
 }
